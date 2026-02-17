@@ -1,5 +1,0 @@
-Django>=5.2
-pydantic-ai>=1.60
-pydantic>=2
-psycopg2-binary
-python-dotenv

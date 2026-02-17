@@ -11,15 +11,23 @@ A learning platform where users create gamified courses on any topic. Courses ar
 
 ## Setup
 
-1. **Clone and create a virtualenv**
+1. **Install uv** (if not already installed)
 
    ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate   # Windows: .venv\Scripts\activate
-   pip install -r requirements.txt
+   curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
 
-2. **Environment**
+   Or see [uv installation docs](https://github.com/astral-sh/uv#installation).
+
+2. **Install dependencies**
+
+   ```bash
+   uv sync
+   ```
+
+   This creates a virtualenv and installs all dependencies from `pyproject.toml`.
+
+3. **Environment**
 
    Copy `.env.example` to `.env` and set at least:
 
@@ -27,16 +35,16 @@ A learning platform where users create gamified courses on any topic. Courses ar
 
    For PostgreSQL (optional), set `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`. If not set, the app uses SQLite.
 
-3. **Database**
+4. **Database**
 
    ```bash
-   python manage.py migrate
+   uv run python manage.py migrate
    ```
 
-4. **Run**
+5. **Run**
 
    ```bash
-   python manage.py runserver
+   uv run python manage.py runserver
    ```
 
    Open http://127.0.0.1:8000/
@@ -66,7 +74,7 @@ A learning platform where users create gamified courses on any topic. Courses ar
 ## Tests
 
 ```bash
-python manage.py test agent.tests
+uv run python manage.py test agent.tests
 ```
 
 The agent build test is skipped unless `OPENAI_API_KEY` is set.

@@ -1,0 +1,17 @@
+[project]
+name = "courseforge"
+version = "0.1.0"
+description = "A learning platform where users create gamified courses on any topic using LLM agents"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "Django>=5.2",
+    "pydantic-ai>=1.60",
+    "pydantic>=2",
+    "psycopg2-binary",
+    "python-dotenv",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
