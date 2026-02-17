@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %}CourseForge – Learn anything, one course at a time{% endblock %}
+
+{% block content %}
+<h1>CourseForge</h1>
+<p>Create and take gamified courses on any topic. Generate courses with AI, then practice with exercises.</p>
+<p><a href="{% url 'register' %}">Register</a> or <a href="{% url 'login' %}">Log in</a> to get started.</p>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Exercise {{ index|add:1 }} of {{ total }} – {{ course.title }}{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'courses:detail' course.slug %}">{{ course.title }}</a> – Exercise {{ index|add:1 }} of {{ total }}</p>
+<h2>{{ exercise.question }}</h2>
+
+{% if exercise.exercise_type == "multiple_choice" %}
+<form method="post" action="">
+    {% csrf_token %}
+    {% for option in exercise.payload.options %}
+    <label>
+        <input type="radio" name="answer" value="{{ forloop.counter0 }}" required>
+        {{ option }}
+    </label><br>
+    {% endfor %}
+    <button type="submit">Submit</button>
+</form>
+{% elif exercise.exercise_type == "matching_pairs" %}
+<form method="post" action="">
+    {% csrf_token %}
+    {% for left in left_items %}
+    <label>
+        {{ left }}
+        <select name="match_{{ forloop.counter0 }}" required>
+            <option value="">-- choose --</option>
+            {% for opt_val, opt_label in right_options %}
+            <option value="{{ opt_val }}">{{ opt_label }}</option>
+            {% endfor %}
+        </select>
+    </label><br>
+    {% endfor %}
+    <button type="submit">Submit</button>
+</form>
+{% endif %}
+{% endblock %}

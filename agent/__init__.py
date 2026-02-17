@@ -1,0 +1,1 @@
+# Course generator agent package

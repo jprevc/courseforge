@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Browse courses – CourseForge{% endblock %}
+
+{% block content %}
+<h1>Browse courses</h1>
+{% if courses %}
+<ul>
+    {% for course in courses %}
+    <li><a href="{% url 'courses:detail' course.slug %}">{{ course.title }}</a></li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No courses yet. <a href="{% url 'courses:create' %}">Create one</a>.</p>
+{% endif %}
+{% if user.is_authenticated %}
+<p><a href="{% url 'courses:create' %}">Create a new course</a></p>
+{% endif %}
+{% endblock %}

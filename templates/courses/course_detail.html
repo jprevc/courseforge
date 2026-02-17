@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.title }} – CourseForge{% endblock %}
+
+{% block content %}
+<h1>{{ course.title }}</h1>
+<section>
+    <h2>Overview</h2>
+    <p>{{ course.overview }}</p>
+</section>
+<section>
+    <h2>Cheatsheet</h2>
+    <pre style="white-space: pre-wrap;">{{ course.cheatsheet }}</pre>
+</section>
+<section>
+    <p><strong>{{ total_exercises }}</strong> exercise(s).</p>
+    {% if user.is_authenticated %}
+    {% if completed_count > 0 %}
+    <p>You've completed <strong>{{ completed_count }}</strong> of {{ total_exercises }} exercises.</p>
+    {% endif %}
+    <p><a href="{% url 'courses:start' course.slug %}">{% if completed_count >= total_exercises %}Review exercises{% else %}Start exercises{% endif %}</a></p>
+    {% else %}
+    <p><a href="{% url 'login' %}">Log in</a> to start exercises.</p>
+    {% endif %}
+</section>
+{% endblock %}

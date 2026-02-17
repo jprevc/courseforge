@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard – CourseForge{% endblock %}
+
+{% block content %}
+<h1>Dashboard</h1>
+<p>Welcome, {{ user.username }}.</p>
+<ul>
+    <li><a href="{% url 'courses:list' %}">Browse all courses</a></li>
+    <li><a href="{% url 'courses:create' %}">Create a new course</a></li>
+</ul>
+<h2>My courses</h2>
+{% if user.created_courses.all %}
+<ul>
+    {% for course in user.created_courses.all %}
+    <li><a href="{% url 'courses:detail' course.slug %}">{{ course.title }}</a></li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>Courses you've created will appear here.</p>
+{% endif %}
+{% endblock %}

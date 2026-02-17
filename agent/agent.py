@@ -1,0 +1,71 @@
+"""
+Course generator agent: takes a topic string and returns structured CourseContent
+(overview, cheatsheet, exercises) using pydantic-ai with structured output.
+"""
+
+from typing import Literal
+
+from pydantic import BaseModel, Field
+from pydantic_ai import Agent
+
+
+class MultipleChoiceExercise(BaseModel):
+    question: str
+    options: list[str] = Field(..., min_length=4, max_length=4)
+    correct_index: int = Field(..., ge=0, le=3)
+
+
+class MatchingPair(BaseModel):
+    left: str
+    right: str
+
+
+class MatchingExercise(BaseModel):
+    question: str
+    pairs: list[MatchingPair] = Field(..., min_length=2)
+
+
+class ExerciseItem(BaseModel):
+    type: Literal["multiple_choice", "matching"]
+    multiple_choice: MultipleChoiceExercise | None = None
+    matching: MatchingExercise | None = None
+
+
+class CourseContent(BaseModel):
+    title: str
+    overview: str
+    cheatsheet: str
+    exercises: list[ExerciseItem] = Field(..., min_length=1)
+
+
+COURSE_GENERATOR_INSTRUCTIONS = """You are an educational content designer. Given a topic, produce a short course with:
+1. A clear title (short, based on the topic).
+2. One overview paragraph (2-4 sentences) explaining what the learner will learn.
+3. A cheatsheet: bullet points or short sections with key facts, formulas, or definitions (use markdown-style newlines).
+4. Between 5 and 8 exercises. Mix multiple choice and matching exercises.
+- Multiple choice: exactly 4 options, one correct. Set correct_index to 0, 1, 2, or 3 for the correct option.
+- Matching: 4 to 6 pairs of (left, right) items that belong together (e.g. term-definition, question-answer).
+Keep explanations clear and concise. Make exercises fun and instructive."""
+
+
+def get_course_generator_agent(model: str = "openai:gpt-4o-mini"):
+    """Build the course generator agent with the given model."""
+    return Agent(
+        model,
+        output_type=CourseContent,
+        instructions=COURSE_GENERATOR_INSTRUCTIONS,
+    )
+
+
+# Default agent instance (model can be overridden via env in run_course_gen)
+_course_agent = None
+
+
+def get_agent():
+    """Return the default course generator agent (lazy init)."""
+    global _course_agent
+    if _course_agent is None:
+        import os
+        model = os.environ.get("COURSEFORGE_LLM_MODEL", "openai:gpt-4o-mini")
+        _course_agent = get_course_generator_agent(model=model)
+    return _course_agent
