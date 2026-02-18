@@ -85,4 +85,4 @@ Runs tests with pytest (see `pyproject.toml` for pytest-django config). The agen
 - **Format:** `uv run black .`
 - **Type check:** `uv run mypy .`
 
-CI runs on push/PR to `main` or `master` (lint, format check, mypy, pytest). See [.github/workflows/ci.yml](.github/workflows/ci.yml).
+CI runs on push/PR to `main` (lint, format check, mypy, pytest). See [.github/workflows/ci.yml](.github/workflows/ci.yml).
