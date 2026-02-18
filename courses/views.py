@@ -126,9 +126,7 @@ def _check_multiple_choice(exercise: Exercise, selected_index: Any) -> bool:
     """Return True if the selected option index matches the correct answer."""
     try:
         idx = int(selected_index)
-        return 0 <= idx < len(exercise.payload.get("options", [])) and idx == exercise.payload.get(
-            "correct_index"
-        )
+        return 0 <= idx < len(exercise.payload.get("options", [])) and idx == exercise.payload.get("correct_index")
     except (TypeError, ValueError):
         return False
 
@@ -161,10 +159,7 @@ def exercise_view(request: HttpRequest, slug: str, index: int) -> HttpResponse:
         if exercise.exercise_type == Exercise.ExerciseType.MULTIPLE_CHOICE:
             correct = _check_multiple_choice(exercise, request.POST.get("answer"))
         elif exercise.exercise_type == Exercise.ExerciseType.MATCHING_PAIRS:
-            selected = {
-                i: request.POST.get(f"match_{i}")
-                for i in range(len(exercise.payload.get("pairs", [])))
-            }
+            selected = {i: request.POST.get(f"match_{i}") for i in range(len(exercise.payload.get("pairs", [])))}
             correct = _check_matching(exercise, selected)
         UserProgress.objects.create(
             user=request.user,
@@ -175,9 +170,7 @@ def exercise_view(request: HttpRequest, slug: str, index: int) -> HttpResponse:
         if next_index >= len(exercises):
             messages.success(request, "Course complete! Well done.")
             return redirect("courses:detail", slug=slug)
-        messages.success(
-            request, "Correct!" if correct else "Not quite. You can try again on the next exercise."
-        )
+        messages.success(request, "Correct!" if correct else "Not quite. You can try again on the next exercise.")
         return redirect("courses:exercise", slug=slug, index=next_index)
 
     # GET: prepare context for template
@@ -193,7 +186,5 @@ def exercise_view(request: HttpRequest, slug: str, index: int) -> HttpResponse:
         random.shuffle(right_indices)
         context["left_items"] = [p["left"] for p in pairs]
         # Options for each dropdown: (original_index, display_text) in shuffled order
-        context["right_options"] = [
-            (right_indices[k], pairs[right_indices[k]]["right"]) for k in range(len(pairs))
-        ]
+        context["right_options"] = [(right_indices[k], pairs[right_indices[k]]["right"]) for k in range(len(pairs))]
     return render(request, "courses/exercise.html", context)
