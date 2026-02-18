@@ -10,8 +10,15 @@ dependencies = [
     "pydantic>=2",
     "psycopg2-binary",
     "python-dotenv",
+    "pytest>=8.0",
+    "pytest-django>=4.0",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "courseforge.settings"
+python_files = ["test_*.py", "*_test.py", "tests.py"]
+addopts = "-v"

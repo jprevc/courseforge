@@ -1,7 +1,9 @@
 import random
+from typing import Any
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
 
@@ -13,13 +15,15 @@ from .forms import CreateCourseForm
 from .models import Course, Exercise
 
 
-def course_list(request):
+def course_list(request: HttpRequest) -> HttpResponse:
+    """List all courses (browse)."""
     courses = Course.objects.all().order_by("-created_at")
     return render(request, "courses/course_list.html", {"courses": courses})
 
 
 @login_required
-def course_create(request):
+def course_create(request: HttpRequest) -> HttpResponse:
+    """Create a new course: show form (GET) or run agent and save (POST)."""
     if request.method != "POST":
         form = CreateCourseForm()
         return render(request, "courses/course_create.html", {"form": form})
@@ -80,7 +84,8 @@ def course_create(request):
     return redirect("courses:detail", slug=course.slug)
 
 
-def course_detail(request, slug):
+def course_detail(request: HttpRequest, slug: str) -> HttpResponse:
+    """Show course overview, cheatsheet, exercise count, and progress (X/Y) for the current user."""
     course = get_object_or_404(Course, slug=slug)
     exercises = list(course.exercises.order_by("order_index"))
     completed_count = 0
@@ -107,8 +112,8 @@ def course_detail(request, slug):
 
 
 @login_required
-def course_start(request, slug):
-    """Redirect to first exercise or back to course if no exercises."""
+def course_start(request: HttpRequest, slug: str) -> HttpResponse:
+    """Redirect to the first exercise or back to course detail if there are no exercises."""
     course = get_object_or_404(Course, slug=slug)
     first = course.exercises.order_by("order_index").first()
     if not first:
@@ -116,7 +121,8 @@ def course_start(request, slug):
     return redirect("courses:exercise", slug=slug, index=0)
 
 
-def _check_multiple_choice(exercise, selected_index):
+def _check_multiple_choice(exercise: Exercise, selected_index: Any) -> bool:
+    """Return True if the selected option index matches the correct answer."""
     try:
         idx = int(selected_index)
         return 0 <= idx < len(exercise.payload.get("options", [])) and idx == exercise.payload.get("correct_index")
@@ -124,8 +130,8 @@ def _check_multiple_choice(exercise, selected_index):
         return False
 
 
-def _check_matching(exercise, selected_by_left):
-    """selected_by_left: dict left_index -> right_index (original). Correct iff selected_by_left[i] == i."""
+def _check_matching(exercise: Exercise, selected_by_left: dict[int, Any]) -> bool:
+    """Return True if each left item is matched to the correct right item (by original index)."""
     pairs = exercise.payload.get("pairs", [])
     if len(selected_by_left) != len(pairs):
         return False
@@ -139,8 +145,8 @@ def _check_matching(exercise, selected_by_left):
 
 
 @login_required
-def exercise_view(request, slug, index):
-    """Show exercise at index; POST to submit answer, then feedback and next/complete."""
+def exercise_view(request: HttpRequest, slug: str, index: int) -> HttpResponse:
+    """Show one exercise (GET) or validate answer and redirect to next / complete (POST)."""
     course = get_object_or_404(Course, slug=slug)
     exercises = list(course.exercises.order_by("order_index"))
     if index < 0 or index >= len(exercises):

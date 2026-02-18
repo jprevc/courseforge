@@ -74,7 +74,7 @@ A learning platform where users create gamified courses on any topic. Courses ar
 ## Tests
 
 ```bash
-uv run python manage.py test agent.tests
+uv run pytest
 ```
 
-The agent build test is skipped unless `OPENAI_API_KEY` is set.
+Runs tests with pytest (see `pyproject.toml` for pytest-django config). The agent build test is skipped unless `OPENAI_API_KEY` is set.

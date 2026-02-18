@@ -10,28 +10,38 @@ from pydantic_ai import Agent
 
 
 class MultipleChoiceExercise(BaseModel):
+    """One multiple-choice question: 4 options and the index of the correct one."""
+
     question: str
     options: list[str] = Field(..., min_length=4, max_length=4)
     correct_index: int = Field(..., ge=0, le=3)
 
 
 class MatchingPair(BaseModel):
+    """One pair of items to be matched (e.g. term and definition)."""
+
     left: str
     right: str
 
 
 class MatchingExercise(BaseModel):
+    """One matching exercise: a list of pairs to connect."""
+
     question: str
     pairs: list[MatchingPair] = Field(..., min_length=2)
 
 
 class ExerciseItem(BaseModel):
+    """Discriminated union: either a multiple_choice or a matching exercise."""
+
     type: Literal["multiple_choice", "matching"]
     multiple_choice: MultipleChoiceExercise | None = None
     matching: MatchingExercise | None = None
 
 
 class CourseContent(BaseModel):
+    """Full course content as returned by the agent: title, overview, cheatsheet, and exercises."""
+
     title: str
     overview: str
     cheatsheet: str
@@ -48,8 +58,8 @@ COURSE_GENERATOR_INSTRUCTIONS = """You are an educational content designer. Give
 Keep explanations clear and concise. Make exercises fun and instructive."""
 
 
-def get_course_generator_agent(model: str = "openai:gpt-4o-mini"):
-    """Build the course generator agent with the given model."""
+def get_course_generator_agent(model: str = "openai:gpt-4o-mini") -> Agent:
+    """Build the course generator agent with the given model string (e.g. openai:gpt-4o-mini)."""
     return Agent(
         model,
         output_type=CourseContent,
@@ -61,8 +71,8 @@ def get_course_generator_agent(model: str = "openai:gpt-4o-mini"):
 _course_agent = None
 
 
-def get_agent():
-    """Return the default course generator agent (lazy init)."""
+def get_agent() -> Agent:
+    """Return the default course generator agent (lazy init, model from env or default)."""
     global _course_agent
     if _course_agent is None:
         import os

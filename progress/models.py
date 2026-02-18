@@ -5,6 +5,8 @@ from courses.models import Exercise
 
 
 class UserProgress(models.Model):
+    """One recorded attempt: user answered an exercise (correct or incorrect) at a given time."""
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -21,5 +23,5 @@ class UserProgress(models.Model):
     class Meta:
         ordering = ["-completed_at"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user} – {self.exercise} ({'correct' if self.correct else 'wrong'})"

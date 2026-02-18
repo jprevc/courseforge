@@ -1,8 +1,10 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
 
 
 class Course(models.Model):
+    """A course: title, overview, cheatsheet, and a list of exercises. Created by a user."""
+
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True, allow_unicode=True)
     overview = models.TextField()
@@ -19,11 +21,13 @@ class Course(models.Model):
     class Meta:
         ordering = ["-created_at"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.title
 
 
 class Exercise(models.Model):
+    """A single exercise (multiple choice or matching pairs) belonging to a course."""
+
     class ExerciseType(models.TextChoices):
         MULTIPLE_CHOICE = "multiple_choice", "Multiple choice"
         MATCHING_PAIRS = "matching_pairs", "Matching pairs"
@@ -44,5 +48,5 @@ class Exercise(models.Model):
         ordering = ["course", "order_index"]
         unique_together = [("course", "order_index")]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.course.title} – #{self.order_index} ({self.exercise_type})"
