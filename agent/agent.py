@@ -76,6 +76,7 @@ def get_agent() -> Agent:
     global _course_agent
     if _course_agent is None:
         import os
+
         model = os.environ.get("COURSEFORGE_LLM_MODEL", "openai:gpt-4o-mini")
         _course_agent = get_course_generator_agent(model=model)
     return _course_agent

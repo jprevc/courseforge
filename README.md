@@ -25,7 +25,7 @@ A learning platform where users create gamified courses on any topic. Courses ar
    uv sync
    ```
 
-   This creates a virtualenv and installs all dependencies from `pyproject.toml`.
+   This creates a virtualenv and installs all dependencies. Development tools (pytest, ruff, mypy, black) are in a separate dev group but are installed by default with `uv sync`.
 
 3. **Environment**
 
@@ -78,3 +78,11 @@ uv run pytest
 ```
 
 Runs tests with pytest (see `pyproject.toml` for pytest-django config). The agent build test is skipped unless `OPENAI_API_KEY` is set.
+
+## Development
+
+- **Lint:** `uv run ruff check .`
+- **Format:** `uv run black .`
+- **Type check:** `uv run mypy .`
+
+CI runs on push/PR to `main` or `master` (lint, format check, mypy, pytest). See [.github/workflows/ci.yml](.github/workflows/ci.yml).

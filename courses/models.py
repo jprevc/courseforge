@@ -32,13 +32,9 @@ class Exercise(models.Model):
         MULTIPLE_CHOICE = "multiple_choice", "Multiple choice"
         MATCHING_PAIRS = "matching_pairs", "Matching pairs"
 
-    course = models.ForeignKey(
-        Course, on_delete=models.CASCADE, related_name="exercises"
-    )
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="exercises")
     order_index = models.PositiveIntegerField(default=0)
-    exercise_type = models.CharField(
-        max_length=20, choices=ExerciseType.choices
-    )
+    exercise_type = models.CharField(max_length=20, choices=ExerciseType.choices)
     question = models.TextField()
     payload = models.JSONField(
         help_text="multiple_choice: {options: [...], correct_index: int}; matching: {pairs: [{left, right}, ...]}"
