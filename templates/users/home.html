@@ -3,7 +3,30 @@
 {% block title %}CourseForge – Learn anything, one course at a time{% endblock %}
 
 {% block content %}
-<h1>CourseForge</h1>
-<p>Create and take gamified courses on any topic. Generate courses with AI, then practice with exercises.</p>
-<p><a href="{% url 'register' %}">Register</a> or <a href="{% url 'login' %}">Log in</a> to get started.</p>
+<section class="hero">
+    <h1>Learn anything, one course at a time</h1>
+    <p class="hero-lead">Create and take gamified courses on any topic. Generate courses with AI, then practice with exercises.</p>
+    <p class="hero-cta">
+        <a href="{% url 'register' %}" role="button" class="btn-primary">Register</a>
+        <a href="{% url 'login' %}" role="button" class="btn-secondary">Log in</a>
+    </p>
+</section>
+
+<section class="how-it-works">
+    <h2>How it works</h2>
+    <div class="card-grid">
+        <article class="card">
+            <h3>Create or browse</h3>
+            <p style="margin-bottom: 0; color: var(--text-muted);">Pick a topic and generate a course with AI, or browse courses others have created.</p>
+        </article>
+        <article class="card">
+            <h3>Learn the basics</h3>
+            <p style="margin-bottom: 0; color: var(--text-muted);">Each course includes an overview and a cheatsheet you can use as reference.</p>
+        </article>
+        <article class="card">
+            <h3>Practice with exercises</h3>
+            <p style="margin-bottom: 0; color: var(--text-muted);">Reinforce what you learned with multiple-choice and matching exercises.</p>
+        </article>
+    </div>
+</section>
 {% endblock %}

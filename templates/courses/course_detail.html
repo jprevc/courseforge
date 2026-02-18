@@ -4,23 +4,31 @@
 
 {% block content %}
 <h1>{{ course.title }}</h1>
-<section>
+
+<section class="card" style="margin-bottom: var(--space-4);">
     <h2>Overview</h2>
     <p>{{ course.overview }}</p>
 </section>
-<section>
+
+<section class="card" style="margin-bottom: var(--space-4);">
     <h2>Cheatsheet</h2>
-    <pre style="white-space: pre-wrap;">{{ course.cheatsheet }}</pre>
+    <pre class="cheatsheet">{{ course.cheatsheet }}</pre>
 </section>
-<section>
+
+<section class="card">
     <p><strong>{{ total_exercises }}</strong> exercise(s).</p>
     {% if user.is_authenticated %}
     {% if completed_count > 0 %}
     <p>You've completed <strong>{{ completed_count }}</strong> of {{ total_exercises }} exercises.</p>
+    {% if total_exercises %}
+    <div class="progress-bar">
+        <div class="progress-bar-fill" style="width: {% widthratio completed_count total_exercises 100 %}%;"></div>
+    </div>
     {% endif %}
-    <p><a href="{% url 'courses:start' course.slug %}">{% if completed_count >= total_exercises %}Review exercises{% else %}Start exercises{% endif %}</a></p>
+    {% endif %}
+    <p style="margin-bottom: 0;"><a href="{% url 'courses:start' course.slug %}" role="button" class="btn-primary">{% if completed_count >= total_exercises %}Review exercises{% else %}Start exercises{% endif %}</a></p>
     {% else %}
-    <p><a href="{% url 'login' %}">Log in</a> to start exercises.</p>
+    <p style="margin-bottom: 0;"><a href="{% url 'login' %}">Log in</a> to start exercises.</p>
     {% endif %}
 </section>
 {% endblock %}

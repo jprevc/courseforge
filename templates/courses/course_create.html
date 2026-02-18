@@ -4,10 +4,14 @@
 
 {% block content %}
 <h1>Create a course</h1>
-<p>Enter a topic. An AI will generate a short course with an overview, cheatsheet, and exercises.</p>
-<form method="post" action="{% url 'courses:create' %}">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Generate course</button>
-</form>
+<p class="form-intro">Enter a topic. An AI will generate a short course with an overview, cheatsheet, and exercises.</p>
+<div class="form-narrow-wrap">
+    <form method="post" action="{% url 'courses:create' %}" class="form-narrow card">
+        {% csrf_token %}
+        {% for field in form %}
+            {% include "partials/form_field.html" with field=field %}
+        {% endfor %}
+        <button type="submit" class="btn-primary">Generate course</button>
+    </form>
+</div>
 {% endblock %}

@@ -4,16 +4,21 @@
 
 {% block content %}
 <h1>Browse courses</h1>
-{% if courses %}
-<ul>
-    {% for course in courses %}
-    <li><a href="{% url 'courses:detail' course.slug %}">{{ course.title }}</a></li>
-    {% endfor %}
-</ul>
-{% else %}
-<p>No courses yet. <a href="{% url 'courses:create' %}">Create one</a>.</p>
-{% endif %}
 {% if user.is_authenticated %}
-<p><a href="{% url 'courses:create' %}">Create a new course</a></p>
+<p><a href="{% url 'courses:create' %}" role="button" class="btn-primary" style="display: inline-block; margin-bottom: var(--space-4);">Create a new course</a></p>
+{% endif %}
+
+{% if courses %}
+<div class="card-grid">
+    {% for course in courses %}
+    <a href="{% url 'courses:detail' course.slug %}" class="card card-link">
+        <strong>{{ course.title }}</strong>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card card-muted">
+    <p style="margin: 0;">No courses yet. <a href="{% url 'courses:create' %}">Create one</a>.</p>
+</div>
 {% endif %}
 {% endblock %}

@@ -1,43 +1,49 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}CourseForge{% endblock %}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css">
-    <style>
-        body { max-width: 900px; margin: 0 auto; padding: 1rem; }
-        nav { margin-bottom: 1.5rem; border-bottom: 1px solid #ccc; padding-bottom: 0.5rem; }
-        nav a { margin-right: 1rem; }
-        .messages { list-style: none; padding: 0; }
-        .messages li { padding: 0.5rem; margin: 0.25rem 0; border-radius: 4px; }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <nav>
-        <a href="{% url 'home' %}">CourseForge</a>
-        {% if user.is_authenticated %}
-            <a href="{% url 'dashboard' %}">Dashboard</a>
-            <a href="{% url 'courses:list' %}">Browse courses</a>
-            <a href="{% url 'courses:create' %}">Create course</a>
-            <span style="float: right;">{{ user.username }}</span>
-            <a href="{% url 'logout' %}" style="float: right;">Log out</a>
-        {% else %}
-            <a href="{% url 'login' %}">Log in</a>
-            <a href="{% url 'register' %}">Register</a>
+    <header class="site-header">
+        <nav class="container">
+            <ul class="nav-left">
+                <li><a href="{% url 'home' %}" class="nav-logo" {% if request.resolver_match.url_name == 'home' and not request.resolver_match.namespace %}aria-current="page"{% endif %}>
+                    <img src="{% static 'images/courseforge_logo.png' %}" alt="CourseForge – Create. Share. Learn." height="56" width="auto">
+                </a></li>
+            </ul>
+            {% if user.is_authenticated %}
+            <ul class="nav-center">
+                <li><a href="{% url 'dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}><i class="fa-solid fa-gauge nav-icon" aria-hidden="true"></i>Dashboard</a></li>
+                <li><a href="{% url 'courses:list' %}" {% if request.resolver_match.namespace == 'courses' and request.resolver_match.url_name == 'list' %}aria-current="page"{% endif %}><i class="fa-solid fa-book nav-icon" aria-hidden="true"></i>Browse courses</a></li>
+                <li><a href="{% url 'courses:create' %}" {% if request.resolver_match.namespace == 'courses' and request.resolver_match.url_name == 'create' %}aria-current="page"{% endif %}><i class="fa-solid fa-plus nav-icon" aria-hidden="true"></i>Create course</a></li>
+            </ul>
+            <ul class="nav-right">
+                <li><span class="nav-username"><i class="fa-solid fa-user nav-icon" aria-hidden="true"></i>{{ user.username }}</span></li>
+                <li><a href="{% url 'logout' %}">Log out</a></li>
+            </ul>
+            {% else %}
+            <ul class="nav-right">
+                <li><a href="{% url 'login' %}" {% if request.resolver_match.url_name == 'login' %}aria-current="page"{% endif %}>Log in</a></li>
+                <li><a href="{% url 'register' %}" role="button" {% if request.resolver_match.url_name == 'register' %}aria-current="page"{% endif %}>Register</a></li>
+            </ul>
+            {% endif %}
+        </nav>
+    </header>
+    <main class="container">
+        {% if messages %}
+        <ul class="messages" role="status">
+            {% for message in messages %}
+            <li class="message {% if message.tags %}message-{{ message.tags }}{% endif %}">{{ message }}</li>
+            {% endfor %}
+        </ul>
         {% endif %}
-    </nav>
-    {% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-        <li class="{{ message.tags }}">{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    <main>
         {% block content %}{% endblock %}
     </main>
 </body>

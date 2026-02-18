@@ -5,18 +5,30 @@
 {% block content %}
 <h1>Dashboard</h1>
 <p>Welcome, {{ user.username }}.</p>
-<ul>
-    <li><a href="{% url 'courses:list' %}">Browse all courses</a></li>
-    <li><a href="{% url 'courses:create' %}">Create a new course</a></li>
-</ul>
+
+<div class="card-grid" style="margin-top: var(--space-4); margin-bottom: var(--space-5);">
+    <a href="{% url 'courses:list' %}" class="card card-action card-link">
+        <h3 style="margin-top: 0;">Browse all courses</h3>
+        <p style="margin-bottom: 0; color: var(--text-muted);">Find and take courses on any topic.</p>
+    </a>
+    <a href="{% url 'courses:create' %}" class="card card-action card-link">
+        <h3 style="margin-top: 0;">Create a new course</h3>
+        <p style="margin-bottom: 0; color: var(--text-muted);">Generate a course with AI from a topic.</p>
+    </a>
+</div>
+
 <h2>My courses</h2>
 {% if user.created_courses.all %}
-<ul>
+<div class="card-grid">
     {% for course in user.created_courses.all %}
-    <li><a href="{% url 'courses:detail' course.slug %}">{{ course.title }}</a></li>
+    <a href="{% url 'courses:detail' course.slug %}" class="card card-link">
+        <strong>{{ course.title }}</strong>
+    </a>
     {% endfor %}
-</ul>
+</div>
 {% else %}
-<p>Courses you've created will appear here.</p>
+<div class="card card-muted">
+    <p style="margin: 0; color: var(--text-muted);">Courses you've created will appear here.</p>
+</div>
 {% endif %}
 {% endblock %}

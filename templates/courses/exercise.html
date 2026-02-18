@@ -3,35 +3,46 @@
 {% block title %}Exercise {{ index|add:1 }} of {{ total }} – {{ course.title }}{% endblock %}
 
 {% block content %}
-<p><a href="{% url 'courses:detail' course.slug %}">{{ course.title }}</a> – Exercise {{ index|add:1 }} of {{ total }}</p>
-<h2>{{ exercise.question }}</h2>
+<p class="exercise-breadcrumb"><a href="{% url 'courses:detail' course.slug %}">{{ course.title }}</a> – Exercise {{ index|add:1 }} of {{ total }}</p>
 
-{% if exercise.exercise_type == "multiple_choice" %}
-<form method="post" action="">
-    {% csrf_token %}
-    {% for option in exercise.payload.options %}
-    <label>
-        <input type="radio" name="answer" value="{{ forloop.counter0 }}" required>
-        {{ option }}
-    </label><br>
-    {% endfor %}
-    <button type="submit">Submit</button>
-</form>
-{% elif exercise.exercise_type == "matching_pairs" %}
-<form method="post" action="">
-    {% csrf_token %}
-    {% for left in left_items %}
-    <label>
-        {{ left }}
-        <select name="match_{{ forloop.counter0 }}" required>
-            <option value="">-- choose --</option>
-            {% for opt_val, opt_label in right_options %}
-            <option value="{{ opt_val }}">{{ opt_label }}</option>
+<div class="card exercise-card">
+    <h2 class="exercise-question">{{ exercise.question }}</h2>
+
+    {% if exercise.exercise_type == "multiple_choice" %}
+    <form method="post" action="">
+        {% csrf_token %}
+        <ul class="exercise-options option-list">
+            {% for option in exercise.payload.options %}
+            <li class="option-card">
+                <label>
+                    <input type="radio" name="answer" value="{{ forloop.counter0 }}" required>
+                    <span class="option-text">{{ option }}</span>
+                </label>
+            </li>
             {% endfor %}
-        </select>
-    </label><br>
-    {% endfor %}
-    <button type="submit">Submit</button>
-</form>
-{% endif %}
+        </ul>
+        <button type="submit" class="btn-primary">Submit</button>
+    </form>
+    {% elif exercise.exercise_type == "matching_pairs" %}
+    <form method="post" action="">
+        {% csrf_token %}
+        <ul class="exercise-options matching-list">
+            {% for left in left_items %}
+            <li class="matching-row">
+                <label>
+                    <span class="matching-left">{{ left }}</span>
+                    <select name="match_{{ forloop.counter0 }}" required>
+                        <option value="">— choose —</option>
+                        {% for opt_val, opt_label in right_options %}
+                        <option value="{{ opt_val }}">{{ opt_label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </li>
+            {% endfor %}
+        </ul>
+        <button type="submit" class="btn-primary">Submit</button>
+    </form>
+    {% endif %}
+</div>
 {% endblock %}

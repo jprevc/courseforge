@@ -6,8 +6,10 @@
 <h1>Register</h1>
 <form method="post" action="{% url 'register' %}">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Register</button>
+    {% for field in form %}
+        {% include "partials/form_field.html" with field=field %}
+    {% endfor %}
+    <button type="submit" class="btn-primary">Register</button>
 </form>
 <p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
 {% endblock %}
