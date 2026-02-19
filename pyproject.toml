@@ -20,6 +20,7 @@ dev = [
     "mypy>=1.0",
     "black>=24.0",
     "django-stubs>=5.0",
+    "django-extensions",
 ]
 
 [build-system]
