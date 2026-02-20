@@ -88,7 +88,6 @@ def _run_generation(
                     question=mat.question,
                     payload={
                         "pairs": [{"left": p.left, "right": p.right} for p in mat.pairs],
-                        "explanation": mat.explanation,
                     },
                 )
 

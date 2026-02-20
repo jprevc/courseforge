@@ -30,7 +30,6 @@ class MatchingExercise(BaseModel):
 
     question: str
     pairs: list[MatchingPair] = Field(..., min_length=2)
-    explanation: str  # Brief summary of how the pairs relate
 
 
 class ExerciseItem(BaseModel):
@@ -62,7 +61,7 @@ Produce a short course with:
 3. A cheatsheet: bullet points or short sections with key facts, formulas, or definitions (use markdown-style newlines).
 4. The requested number of exercises (or 5–8 if not specified). Mix multiple choice and matching exercises.
 - Multiple choice: exactly 4 options, one correct. Set correct_index to 0, 1, 2, or 3 for the correct option. Always include an explanation: a short sentence explaining why the correct answer is right.
-- Matching: 4 to 6 pairs of (left, right) items that belong together (e.g. term-definition, question-answer). Always include an explanation: a brief summary of how the pairs relate.
+- Matching: 4 to 6 pairs of (left, right) items that belong together (e.g. term-definition, question-answer).
 Keep explanations clear and concise. Make exercises fun and instructive. Always respect the difficulty level and any additional instructions."""
 
 
