@@ -132,6 +132,28 @@ a, button {
   opacity: 0.85;
 }
 
+/* Logout form in nav: inline, no layout shift, button looks like link */
+.site-header nav form.inline-form {
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
+.site-header nav form.inline-form button[type="submit"] {
+  background: none;
+  border: none;
+  color: var(--text);
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.site-header nav form.inline-form button[type="submit"]:hover {
+  color: var(--primary-hover);
+}
+
 .nav-logo {
   display: flex;
   align-items: center;
