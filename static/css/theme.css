@@ -364,7 +364,63 @@ a.card.card-link:hover {
 /* Narrow form layout (create course, etc.) */
 .form-narrow-wrap {
   max-width: 28rem;
-  margin: var(--space-4) 0;
+  margin: var(--space-4) auto;
+}
+
+/* Auth forms (login, register): centered on screen, narrow card, narrow button */
+.auth-form-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: var(--space-4) var(--space-3);
+}
+.auth-form-wrapper .auth-form {
+  width: 100%;
+  max-width: 22rem;
+  margin: 0;
+  padding: var(--space-5);
+  box-sizing: border-box;
+}
+.auth-form-wrapper .auth-form h1 {
+  margin-top: 0;
+  text-align: center;
+}
+/* Override Pico: keep inputs and form narrow inside the card */
+.auth-form-wrapper .auth-form .form-narrow {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.auth-form-wrapper .auth-form input[type="text"],
+.auth-form-wrapper .auth-form input[type="email"],
+.auth-form-wrapper .auth-form input[type="password"],
+.auth-form-wrapper .auth-form input[type="url"],
+.auth-form-wrapper .auth-form select,
+.auth-form-wrapper .auth-form textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+.auth-form-wrapper .auth-form .auth-form-actions {
+  margin-top: var(--space-4);
+  text-align: center;
+}
+.auth-form-wrapper .auth-form .auth-form-actions .btn-primary {
+  width: auto !important;
+  min-width: 8rem;
+  margin-top: 0;
+}
+.auth-form-wrapper .auth-form .form-narrow + p {
+  text-align: center;
+  margin-top: var(--space-4);
+  margin-bottom: 0;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+}
+.auth-form-wrapper .auth-form .form-narrow + p a {
+  color: var(--primary);
+  font-weight: 500;
 }
 
 .form-narrow input[type="text"],
@@ -420,6 +476,49 @@ a.card.card-link:hover {
 .exercise-card .exercise-question {
   margin-top: 0;
   margin-bottom: var(--space-4);
+}
+
+.exercise-feedback {
+  margin-top: var(--space-2);
+}
+
+.exercise-feedback .feedback-message {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+}
+
+.exercise-feedback .feedback-correct {
+  color: var(--success-text, #0d9488);
+}
+
+.exercise-feedback .feedback-incorrect {
+  color: var(--error-text);
+}
+
+.exercise-feedback .explanation-block {
+  padding: var(--space-4);
+  background: var(--surface-elevated);
+  border-radius: var(--radius);
+  border-left: 4px solid var(--primary);
+  margin-bottom: var(--space-4);
+}
+
+.exercise-feedback .explanation-block h3 {
+  margin-top: 0;
+  margin-bottom: var(--space-2);
+  font-size: 1rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.exercise-feedback .explanation-block p {
+  margin: 0;
+}
+
+.exercise-feedback .exercise-next {
+  margin-bottom: 0;
 }
 
 .exercise-options {
