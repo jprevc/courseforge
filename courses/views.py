@@ -1,19 +1,113 @@
 """Views for course listing, creation, detail, and exercise flow."""
 
 import random
+import threading
 from typing import Any
 
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.http import HttpRequest, HttpResponse
+from django.db import close_old_connections
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.text import slugify
 
 from agent.run_course_gen import run_course_generator_sync
 from progress.models import UserProgress
 
 from .forms import CreateCourseForm
-from .models import Course, Exercise
+from .models import Course, CourseGenerationJob, Exercise
+
+
+def _run_generation(
+    job_id: str,
+    topic: str,
+    user_id: int,
+    difficulty: str = "beginner",
+    additional_instructions: str | None = None,
+    num_exercises: int | None = None,
+) -> None:
+    """Background thread: run course generator and update job (status, course, error)."""
+    try:
+        close_old_connections()
+        job = CourseGenerationJob.objects.get(pk=job_id)
+        user = get_user_model().objects.get(pk=user_id)
+
+        job.status = CourseGenerationJob.Status.RUNNING
+        job.status_message = "Connecting to AI..."
+        job.save(update_fields=["status", "status_message"])
+
+        job.status_message = "Generating course outline..."
+        job.save(update_fields=["status_message"])
+
+        content = run_course_generator_sync(
+            topic=topic,
+            difficulty=difficulty,
+            additional_instructions=additional_instructions,
+            num_exercises=num_exercises,
+        )
+
+        job.status_message = "Creating exercises..."
+        job.save(update_fields=["status_message"])
+
+        base_slug = slugify(content.title, allow_unicode=True) or "course"
+        slug = base_slug
+        n = 1
+        while Course.objects.filter(slug=slug).exists():
+            slug = f"{base_slug}-{n}"
+            n += 1
+        course = Course.objects.create(
+            title=content.title,
+            slug=slug,
+            overview=content.overview,
+            cheatsheet=content.cheatsheet,
+            created_by=user,
+            topic_normalized=topic.lower()[:255],
+        )
+        for i, item in enumerate(content.exercises):
+            if item.type == "multiple_choice" and item.multiple_choice:
+                mc = item.multiple_choice
+                Exercise.objects.create(
+                    course=course,
+                    order_index=i,
+                    exercise_type=Exercise.ExerciseType.MULTIPLE_CHOICE,
+                    question=mc.question,
+                    payload={
+                        "options": mc.options,
+                        "correct_index": mc.correct_index,
+                        "explanation": mc.explanation,
+                    },
+                )
+            elif item.type == "matching" and item.matching:
+                mat = item.matching
+                Exercise.objects.create(
+                    course=course,
+                    order_index=i,
+                    exercise_type=Exercise.ExerciseType.MATCHING_PAIRS,
+                    question=mat.question,
+                    payload={
+                        "pairs": [{"left": p.left, "right": p.right} for p in mat.pairs],
+                        "explanation": mat.explanation,
+                    },
+                )
+
+        job.course = course
+        job.status = CourseGenerationJob.Status.COMPLETE
+        job.status_message = "Done!"
+        job.save(update_fields=["course", "status", "status_message"])
+    except Exception as e:
+        try:
+            close_old_connections()
+            job = CourseGenerationJob.objects.get(pk=job_id)
+            job.status = CourseGenerationJob.Status.FAILED
+            job.error = str(e)
+            job.status_message = "Failed"
+            job.save(update_fields=["status", "error", "status_message"])
+        finally:
+            close_old_connections()
+    finally:
+        close_old_connections()
 
 
 def course_list(request: HttpRequest) -> HttpResponse:
@@ -24,7 +118,7 @@ def course_list(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def course_create(request: HttpRequest) -> HttpResponse:
-    """Create a new course: show form (GET) or run agent and save (POST)."""
+    """Create a new course: show form (GET) or create job, start background thread, redirect (POST)."""
     if request.method != "POST":
         form = CreateCourseForm()
         return render(request, "courses/course_create.html", {"form": form})
@@ -35,54 +129,41 @@ def course_create(request: HttpRequest) -> HttpResponse:
     if not topic:
         form.add_error("topic", "Topic is required.")
         return render(request, "courses/course_create.html", {"form": form})
-    try:
-        content = run_course_generator_sync(topic)
-    except Exception as e:
-        messages.error(
-            request,
-            f"Failed to generate course: {e}. Check your API key and try again.",
-        )
-        return render(request, "courses/course_create.html", {"form": form})
-    base_slug = slugify(content.title, allow_unicode=True) or "course"
-    slug = base_slug
-    n = 1
-    while Course.objects.filter(slug=slug).exists():
-        slug = f"{base_slug}-{n}"
-        n += 1
-    course = Course.objects.create(
-        title=content.title,
-        slug=slug,
-        overview=content.overview,
-        cheatsheet=content.cheatsheet,
-        created_by=request.user,
-        topic_normalized=topic.lower()[:255],
+    job = CourseGenerationJob.objects.create(status=CourseGenerationJob.Status.PENDING)
+    thread = threading.Thread(
+        target=_run_generation,
+        args=(
+            str(job.id),
+            topic,
+            request.user.id,
+            form.cleaned_data["difficulty"],
+            form.cleaned_data.get("additional_instructions") or None,
+            form.cleaned_data.get("num_exercises"),
+        ),
+        daemon=True,
     )
-    for i, item in enumerate(content.exercises):
-        if item.type == "multiple_choice" and item.multiple_choice:
-            mc = item.multiple_choice
-            Exercise.objects.create(
-                course=course,
-                order_index=i,
-                exercise_type=Exercise.ExerciseType.MULTIPLE_CHOICE,
-                question=mc.question,
-                payload={
-                    "options": mc.options,
-                    "correct_index": mc.correct_index,
-                },
-            )
-        elif item.type == "matching" and item.matching:
-            mat = item.matching
-            Exercise.objects.create(
-                course=course,
-                order_index=i,
-                exercise_type=Exercise.ExerciseType.MATCHING_PAIRS,
-                question=mat.question,
-                payload={
-                    "pairs": [{"left": p.left, "right": p.right} for p in mat.pairs],
-                },
-            )
-    messages.success(request, f"Course “{course.title}” created.")
-    return redirect("courses:detail", slug=course.slug)
+    thread.start()
+    return redirect("courses:generating", job_id=job.id)
+
+
+@login_required
+def generating_view(request: HttpRequest, job_id: str) -> HttpResponse:
+    """Show the generating progress page; JS polls job_status_api until complete."""
+    job = get_object_or_404(CourseGenerationJob, pk=job_id)
+    return render(request, "courses/generating.html", {"job": job})
+
+
+@login_required
+def job_status_api(request: HttpRequest, job_id: str) -> HttpResponse:
+    """Return JSON {status, message, course_slug} for polling."""
+    job = get_object_or_404(CourseGenerationJob, pk=job_id)
+    data = {
+        "status": job.status,
+        "message": job.status_message or "",
+        "course_slug": job.course.slug if job.course_id else None,
+        "error": job.error or "",
+    }
+    return JsonResponse(data)
 
 
 def course_detail(request: HttpRequest, slug: str) -> HttpResponse:
@@ -166,19 +247,21 @@ def exercise_view(request: HttpRequest, slug: str, index: int) -> HttpResponse:
             exercise=exercise,
             correct=correct,
         )
-        next_index = index + 1
-        if next_index >= len(exercises):
-            messages.success(request, "Course complete! Well done.")
-            return redirect("courses:detail", slug=slug)
-        messages.success(request, "Correct!" if correct else "Not quite. You can try again on the next exercise.")
-        return redirect("courses:exercise", slug=slug, index=next_index)
+        # Redirect to same exercise with answered=1 so we can show feedback and explanation
+        correct_param = "1" if correct else "0"
+        url = reverse("courses:exercise", kwargs={"slug": slug, "index": index})
+        return redirect(f"{url}?answered=1&correct={correct_param}")
 
     # GET: prepare context for template
+    answered = request.GET.get("answered") == "1"
     context = {
         "course": course,
         "exercise": exercise,
         "index": index,
         "total": len(exercises),
+        "answered": answered,
+        "correct": request.GET.get("correct") == "1" if answered else None,
+        "explanation": exercise.payload.get("explanation", "") if answered else "",
     }
     if exercise.exercise_type == Exercise.ExerciseType.MATCHING_PAIRS:
         pairs = exercise.payload.get("pairs", [])
