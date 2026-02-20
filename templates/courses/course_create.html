@@ -4,7 +4,7 @@
 
 {% block content %}
 <h1>Create a course</h1>
-<p class="form-intro">Enter a topic. An AI will generate a short course with an overview, cheatsheet, and exercises.</p>
+<p class="form-intro">Enter a topic and options. An AI will generate a short course with an overview, cheatsheet, and exercises.</p>
 <div class="form-narrow-wrap">
     <form method="post" action="{% url 'courses:create' %}" class="form-narrow card">
         {% csrf_token %}

@@ -8,7 +8,26 @@
 <div class="card exercise-card">
     <h2 class="exercise-question">{{ exercise.question }}</h2>
 
-    {% if exercise.exercise_type == "multiple_choice" %}
+    {% if answered %}
+    <div class="exercise-feedback">
+        <p class="feedback-message {% if correct %}feedback-correct{% else %}feedback-incorrect{% endif %}">
+            {% if correct %}Correct!{% else %}Not quite.{% endif %}
+        </p>
+        {% if explanation %}
+        <div class="explanation-block">
+            <h3>Explanation</h3>
+            <p>{{ explanation }}</p>
+        </div>
+        {% endif %}
+        <p class="exercise-next">
+            {% if index|add:1 < total %}
+            <a href="{% url 'courses:exercise' course.slug index|add:1 %}" class="btn-primary">Next exercise</a>
+            {% else %}
+            <a href="{% url 'courses:detail' course.slug %}" class="btn-primary">Back to course</a>
+            {% endif %}
+        </p>
+    </div>
+    {% elif exercise.exercise_type == "multiple_choice" %}
     <form method="post" action="">
         {% csrf_token %}
         <ul class="exercise-options option-list">

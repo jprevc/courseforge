@@ -6,10 +6,21 @@ Returns CourseContent or raises on failure.
 from agent.agent import CourseContent, get_agent
 
 
-def run_course_generator_sync(topic: str) -> CourseContent:
-    """Generate course content for the given topic. Blocks until done."""
+def run_course_generator_sync(
+    topic: str,
+    difficulty: str = "beginner",
+    additional_instructions: str | None = None,
+    num_exercises: int | None = None,
+) -> CourseContent:
+    """Generate course content for the given topic and options. Blocks until done."""
+    parts = [f"Topic: {topic.strip()}", f"Difficulty: {difficulty.strip().capitalize()}"]
+    if additional_instructions and additional_instructions.strip():
+        parts.append(f"Additional instructions: {additional_instructions.strip()}")
+    if num_exercises is not None:
+        parts.append(f"Number of exercises: {num_exercises}")
+    prompt = "\n\n".join(parts)
     agent = get_agent()
-    result = agent.run_sync(topic)
+    result = agent.run_sync(prompt)
     if not result.output:
         raise RuntimeError("Agent returned no output")
     return result.output
