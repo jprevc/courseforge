@@ -6,6 +6,12 @@
 <p class="exercise-breadcrumb"><a href="{% url 'courses:detail' course.slug %}">{{ course.title }}</a> – Exercise {{ index|add:1 }} of {{ total }}</p>
 
 <div class="card exercise-card">
+    <div class="exercise-progress-bar-wrap">
+        <div class="progress-bar">
+            <div class="progress-bar-fill" style="width: {% widthratio index|add:1 total 100 %}%"></div>
+        </div>
+        <p class="exercise-progress-label">Exercise {{ index|add:1 }} of {{ total }}</p>
+    </div>
     <h2 class="exercise-question">{{ exercise.question }}</h2>
 
     {% if exercise.exercise_type == "multiple_choice" %}

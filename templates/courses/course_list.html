@@ -5,20 +5,33 @@
 {% block content %}
 <h1>Browse courses</h1>
 {% if user.is_authenticated %}
-<p><a href="{% url 'courses:create' %}" role="button" class="btn-primary" style="display: inline-block; margin-bottom: var(--space-4);">Create a new course</a></p>
+<p><a href="{% url 'courses:create' %}" role="button" class="btn-primary cta-top">Create a new course</a></p>
 {% endif %}
 
 {% if courses %}
 <div class="card-grid">
     {% for course in courses %}
-    <a href="{% url 'courses:detail' course.slug %}" class="card card-link">
-        <strong>{{ course.title }}</strong>
+    <a href="{% url 'courses:detail' course.slug %}" class="card card-link card-course">
+        <strong class="card-course-title">{{ course.title }}</strong>
+        {% if course.overview %}
+        <p class="card-course-excerpt">{{ course.overview|truncatewords:12 }}</p>
+        {% endif %}
+        <div class="card-course-meta">
+            {% if course.created_by %}<span><i class="fa-solid fa-user" aria-hidden="true"></i> {{ course.created_by.username }}</span>{% endif %}
+            <span><i class="fa-solid fa-dumbbell" aria-hidden="true"></i> {{ course.exercises.count }} exercise{{ course.exercises.count|pluralize }}</span>
+        </div>
     </a>
     {% endfor %}
 </div>
 {% else %}
 <div class="card card-muted">
-    <p style="margin: 0;">No courses yet. <a href="{% url 'courses:create' %}">Create one</a>.</p>
+    <div class="empty-state">
+        <i class="fa-solid fa-graduation-cap empty-state-icon"></i>
+        <p>No courses yet.</p>
+        {% if user.is_authenticated %}
+        <a href="{% url 'courses:create' %}" class="btn-primary">Create the first course</a>
+        {% endif %}
+    </div>
 </div>
 {% endif %}
 {% endblock %}

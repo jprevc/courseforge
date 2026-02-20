@@ -45,7 +45,15 @@ body {
   line-height: 1.6;
 }
 
-main.container,
+main.container {
+  max-width: 1280px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+
 .site-header .container {
   max-width: none;
   width: 100%;
@@ -252,6 +260,61 @@ a.card.card-link:hover {
   display: block;
 }
 
+/* Enriched course cards */
+a.card.card-course {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.card-course-title {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.card-course-excerpt {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.card-course-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-top: auto;
+}
+
+.card-course-meta i {
+  margin-right: 0.25em;
+}
+
+.card-course-progress {
+  height: 5px;
+  background: var(--border);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-top: var(--space-1);
+}
+
+.card-course-progress-bar {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+}
+
+.card-course-progress-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 /* Buttons */
 .btn-primary {
   background: var(--primary);
@@ -294,6 +357,7 @@ a.card.card-link:hover {
 }
 
 .hero h1 {
+  font-size: 2.75rem;
   margin-bottom: var(--space-3);
 }
 
@@ -329,6 +393,18 @@ a.card.card-link:hover {
 
 .how-it-works .card h3 {
   font-size: 1rem;
+}
+
+.how-it-works .card .feature-icon {
+  font-size: 2rem;
+  color: var(--primary);
+  display: block;
+  margin-bottom: var(--space-3);
+}
+
+.how-it-works .card p {
+  margin-bottom: 0;
+  color: var(--text-muted);
 }
 
 /* Progress bar */
@@ -385,14 +461,24 @@ a.card.card-link:hover {
   margin-bottom: 0;
 }
 
+/* Override Pico CSS so cheatsheet lists have no bullets */
 .cheatsheet-rendered ul,
 .cheatsheet-rendered ol {
   margin: 0 0 var(--space-2);
-  padding-left: var(--space-5);
+  padding-left: 0;
+  list-style: none !important;
+  list-style-type: none !important;
 }
 
 .cheatsheet-rendered li {
   margin-bottom: var(--space-1);
+  list-style: none !important;
+  list-style-type: none !important;
+}
+
+.cheatsheet-rendered li::marker {
+  content: none !important;
+  display: none !important;
 }
 
 .cheatsheet-rendered code {
@@ -523,6 +609,18 @@ a.card.card-link:hover {
   font-size: 0.875rem;
   color: var(--error-text);
   margin-top: var(--space-1);
+}
+
+/* Exercise progress bar within card */
+.exercise-progress-bar-wrap {
+  margin-bottom: var(--space-4);
+}
+
+.exercise-progress-label {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin: var(--space-1) 0 0;
+  text-align: right;
 }
 
 /* Exercise page */
@@ -702,4 +800,75 @@ a.card.card-link:hover {
 .matching-correct {
   font-weight: 500;
   color: var(--success-text, #0d9488);
+}
+
+/* Spacing & color utilities */
+.mb-0 { margin-bottom: 0; }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-5 { margin-bottom: var(--space-5); }
+.mt-0 { margin-top: 0; }
+.mt-4 { margin-top: var(--space-4); }
+.text-muted { color: var(--text-muted); }
+
+/* Dashboard action card grid */
+.card-grid-actions {
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.card-action h3 {
+  margin-top: 0;
+}
+
+.card-action p {
+  margin-bottom: 0;
+  color: var(--text-muted);
+}
+
+/* CTA button above a list */
+.cta-top {
+  display: inline-block;
+  margin-bottom: var(--space-4);
+}
+
+/* Spaced card (course detail sections) */
+.card-spaced {
+  margin-bottom: var(--space-4);
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: var(--space-5) var(--space-4);
+}
+
+.empty-state-icon {
+  font-size: 2.75rem;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: var(--space-3);
+}
+
+.empty-state p {
+  color: var(--text-muted);
+  margin-bottom: var(--space-4);
+}
+
+/* Site footer */
+.site-footer {
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-4);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.site-footer a {
+  color: var(--text-muted);
+  text-underline-offset: 3px;
+}
+
+.site-footer a:hover {
+  color: var(--primary-hover);
 }
