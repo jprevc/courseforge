@@ -19,6 +19,10 @@ RUN uv sync --frozen --no-dev
 # Collect static files (required for WhiteNoise)
 RUN uv run python manage.py collectstatic --noinput --clear 2>/dev/null || true
 
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+ENTRYPOINT ["/docker-entrypoint.sh"]
+
 EXPOSE 8000
 
 # Run gunicorn; override with docker run ... or in compose
