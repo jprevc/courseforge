@@ -735,8 +735,20 @@ a.card.card-course {
   margin: 0 0 var(--space-4);
 }
 
+.option-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+@media (max-width: 480px) {
+  .option-list { grid-template-columns: 1fr; }
+}
+
+.option-list .option-card label { height: 100%; }
+
 .option-list .option-card {
-  margin-bottom: var(--space-2);
+  margin-bottom: 0;
 }
 
 .option-card label {
@@ -845,6 +857,90 @@ a.card.card-course {
 .matching-correct {
   font-weight: 500;
   color: var(--success-text, #0d9488);
+}
+
+/* Matching pairs – interactive tile layout */
+.matching-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.matching-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.matching-tile {
+  padding: var(--space-3);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: center;
+  user-select: none;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.matching-tile:hover:not(.matched):not(.wrong) {
+  background: var(--surface-elevated);
+  border-color: var(--secondary);
+}
+
+.matching-tile.selected {
+  border-color: var(--primary);
+  background: rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.matching-tile.matched {
+  border-color: var(--success);
+  background: rgba(52, 211, 153, 0.15);
+  cursor: default;
+}
+
+.matching-tile.wrong {
+  border-color: var(--error);
+  background: rgba(248, 113, 113, 0.15);
+}
+
+/* Matching pairs – answered state */
+.matching-answered-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border);
+  align-items: start;
+}
+
+.matching-answered-row:last-child {
+  border-bottom: none;
+}
+
+.matching-answered-cell {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  border: 2px solid var(--border-strong);
+}
+
+.matching-answered-cell.correct {
+  border-color: var(--success);
+  background: rgba(52, 211, 153, 0.1);
+}
+
+.matching-answered-cell.wrong {
+  border-color: var(--error);
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.matching-answered-correct-answer {
+  font-size: 0.875rem;
+  color: var(--success-text);
+  margin-top: var(--space-1);
 }
 
 /* Spacing & color utilities */

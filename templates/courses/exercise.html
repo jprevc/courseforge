@@ -43,35 +43,99 @@
 
     {% elif exercise.exercise_type == "matching_pairs" %}
     {% if answered %}
-    <ul class="exercise-options matching-list exercise-options-answered">
+    <div class="mb-4">
         {% for row in matching_result %}
-        <li class="matching-row matching-row-answered">
-            <span class="matching-left">{{ row.left }}</span>
-            <span class="matching-your">You: {{ row.user_right }}</span>
-            <span class="matching-correct">Correct: {{ row.correct_right }}</span>
-        </li>
+        <div class="matching-answered-row">
+            <div class="matching-answered-cell {% if row.is_correct %}correct{% else %}wrong{% endif %}">
+                <span class="matching-left">{{ row.left }}</span>
+            </div>
+            <div>
+                <div class="matching-answered-cell {% if row.is_correct %}correct{% else %}wrong{% endif %}">
+                    {{ row.user_right }}
+                </div>
+                {% if not row.is_correct %}
+                <p class="matching-answered-correct-answer">Correct: {{ row.correct_right }}</p>
+                {% endif %}
+            </div>
+        </div>
         {% endfor %}
-    </ul>
+    </div>
     {% else %}
-    <form method="post" action="">
+    <form method="post" action="" id="matching-form">
         {% csrf_token %}
-        <ul class="exercise-options matching-list">
-            {% for left in left_items %}
-            <li class="matching-row">
-                <label>
-                    <span class="matching-left">{{ left }}</span>
-                    <select name="match_{{ forloop.counter0 }}" required>
-                        <option value="">— choose —</option>
-                        {% for opt_val, opt_label in right_options %}
-                        <option value="{{ opt_val }}">{{ opt_label }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-            </li>
-            {% endfor %}
-        </ul>
-        <button type="submit" class="btn-primary">Submit</button>
+        {% for left in left_items %}
+        <input type="hidden" name="match_{{ forloop.counter0 }}" id="match-input-{{ forloop.counter0 }}">
+        {% endfor %}
+        <div class="matching-columns">
+            <div class="matching-col" id="left-col">
+                {% for left in left_items %}
+                <div class="matching-tile"
+                     data-side="left"
+                     data-index="{{ forloop.counter0 }}">{{ left }}</div>
+                {% endfor %}
+            </div>
+            <div class="matching-col" id="right-col">
+                {% for opt_val, opt_label in right_options %}
+                <div class="matching-tile"
+                     data-side="right"
+                     data-value="{{ opt_val }}">{{ opt_label }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        <button type="submit" class="btn-primary" id="matching-submit" disabled>Submit</button>
     </form>
+    <script>
+    (function () {
+        var total = {{ left_items|length }};
+        var selectedLeft = null;
+        var matchedCount = 0;
+
+        document.querySelectorAll('.matching-tile[data-side="left"]').forEach(function (tile) {
+            tile.addEventListener('click', function () {
+                if (tile.classList.contains('matched')) return;
+                if (selectedLeft && selectedLeft !== tile) {
+                    selectedLeft.classList.remove('selected');
+                }
+                if (selectedLeft === tile) {
+                    tile.classList.remove('selected');
+                    selectedLeft = null;
+                } else {
+                    tile.classList.add('selected');
+                    selectedLeft = tile;
+                }
+            });
+        });
+
+        document.querySelectorAll('.matching-tile[data-side="right"]').forEach(function (tile) {
+            tile.addEventListener('click', function () {
+                if (!selectedLeft) return;
+                if (tile.classList.contains('matched')) return;
+                var leftIdx = parseInt(selectedLeft.dataset.index, 10);
+                var rightVal = parseInt(tile.dataset.value, 10);
+                if (rightVal === leftIdx) {
+                    selectedLeft.classList.remove('selected');
+                    selectedLeft.classList.add('matched');
+                    tile.classList.add('matched');
+                    document.getElementById('match-input-' + leftIdx).value = rightVal;
+                    selectedLeft = null;
+                    matchedCount += 1;
+                    if (matchedCount === total) {
+                        document.getElementById('matching-submit').disabled = false;
+                    }
+                } else {
+                    selectedLeft.classList.add('wrong');
+                    tile.classList.add('wrong');
+                    var leftTile = selectedLeft;
+                    selectedLeft = null;
+                    setTimeout(function () {
+                        leftTile.classList.remove('wrong', 'selected');
+                        tile.classList.remove('wrong');
+                    }, 700);
+                }
+            });
+        });
+    })();
+    </script>
     {% endif %}
     {% endif %}
 
