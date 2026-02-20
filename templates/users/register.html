@@ -3,13 +3,19 @@
 {% block title %}Register – CourseForge{% endblock %}
 
 {% block content %}
-<h1>Register</h1>
-<form method="post" action="{% url 'register' %}">
-    {% csrf_token %}
-    {% for field in form %}
-        {% include "partials/form_field.html" with field=field %}
-    {% endfor %}
-    <button type="submit" class="btn-primary">Register</button>
-</form>
-<p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+<div class="auth-form-wrapper">
+    <div class="card auth-form">
+        <h1>Register</h1>
+        <form method="post" action="{% url 'register' %}" class="form-narrow">
+            {% csrf_token %}
+            {% for field in form %}
+                {% include "partials/form_field.html" with field=field %}
+            {% endfor %}
+            <div class="auth-form-actions">
+                <button type="submit" class="btn-primary">Register</button>
+            </div>
+        </form>
+        <p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+    </div>
+</div>
 {% endblock %}
