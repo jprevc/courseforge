@@ -11,6 +11,8 @@ dependencies = [
     "psycopg2-binary",
     "python-dotenv",
     "markdown>=3.5",
+    "gunicorn",
+    "whitenoise",
 ]
 
 [dependency-groups]
