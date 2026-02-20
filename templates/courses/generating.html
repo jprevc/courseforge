@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Generating course – CourseForge{% endblock %}
+
+{% block extra_head %}
+<style>
+  .generating-card {
+    max-width: 28rem;
+    margin: var(--space-6) auto;
+    padding: var(--space-5);
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+  }
+  .generating-card h2 {
+    margin-top: 0;
+    text-align: center;
+    color: var(--text);
+  }
+  .generating-status {
+    min-height: 1.5em;
+    margin: var(--space-4) 0;
+    color: var(--text-muted);
+    text-align: center;
+    font-size: 1rem;
+  }
+  .generating-progress-wrap {
+    height: 8px;
+    background: var(--surface-elevated);
+    border-radius: 999px;
+    overflow: hidden;
+    margin: var(--space-4) 0;
+  }
+  .generating-progress-bar {
+    height: 100%;
+    width: 35%;
+    background: linear-gradient(
+      90deg,
+      var(--primary) 0%,
+      var(--primary-hover) 50%,
+      var(--primary) 100%
+    );
+    background-size: 200% 100%;
+    border-radius: 999px;
+    animation: generating-shimmer 1.5s ease-in-out infinite;
+  }
+  .generating-progress-bar.complete {
+    width: 100%;
+    background: var(--success);
+    background-size: 100% 100%;
+    animation: none;
+  }
+  .generating-progress-bar.failed {
+    width: 100%;
+    background: var(--error);
+    animation: none;
+  }
+  @keyframes generating-shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(400%); }
+  }
+  .generating-error {
+    margin-top: var(--space-3);
+    padding: var(--space-3);
+    background: var(--error-bg);
+    color: var(--error-text);
+    border-radius: var(--radius);
+    font-size: 0.9375rem;
+  }
+  .generating-error.hidden {
+    display: none;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="generating-card">
+  <h2><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i> Generating your course</h2>
+  <p class="generating-status" id="status-message" data-initial="Connecting to AI...">Connecting to AI...</p>
+  <div class="generating-progress-wrap">
+    <div class="generating-progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Course generation progress"></div>
+  </div>
+  <div class="generating-error hidden" id="error-message" role="alert"></div>
+</div>
+
+<script>
+(function() {
+  const POLL_INTERVAL_MS = 2000;
+  const statusUrl = "{% url 'courses:job_status' job_id=job.id %}";
+  const detailUrlTemplate = "{% url 'courses:detail' slug='__SLUG__' %}";
+  const statusEl = document.getElementById("status-message");
+  const progressBar = document.getElementById("progress-bar");
+  const errorEl = document.getElementById("error-message");
+
+  function showError(msg) {
+    errorEl.textContent = msg || "Something went wrong.";
+    errorEl.classList.remove("hidden");
+  }
+
+  function poll() {
+    fetch(statusUrl, { headers: { "Accept": "application/json" } })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        statusEl.textContent = data.message || statusEl.textContent;
+        if (data.status === "complete") {
+          progressBar.classList.add("complete");
+          progressBar.setAttribute("aria-valuenow", "100");
+          if (data.course_slug) {
+            window.location.href = detailUrlTemplate.replace("__SLUG__", data.course_slug);
+          } else {
+            showError("Course was created but the link could not be determined.");
+          }
+          return;
+        }
+        if (data.status === "failed") {
+          progressBar.classList.add("failed");
+          progressBar.setAttribute("aria-valuenow", "100");
+          showError(data.error || data.message || "Generation failed.");
+          return;
+        }
+        setTimeout(poll, POLL_INTERVAL_MS);
+      })
+      .catch(function() {
+        showError("Could not check status. Please refresh the page.");
+      });
+  }
+
+  setTimeout(poll, POLL_INTERVAL_MS);
+})();
+</script>
+{% endblock %}
