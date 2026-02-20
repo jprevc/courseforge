@@ -71,6 +71,7 @@ def get_course_generator_agent(model: str = "openai:gpt-4o-mini") -> Agent:
         model,
         output_type=CourseContent,
         instructions=COURSE_GENERATOR_INSTRUCTIONS,
+        output_retries=3,
     )
 
 
