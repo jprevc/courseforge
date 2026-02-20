@@ -70,6 +70,28 @@ h1 { font-size: 1.75rem; margin-bottom: var(--space-3); }
 h2 { font-size: 1.375rem; margin-top: var(--space-4); margin-bottom: var(--space-2); }
 h3 { font-size: 1.125rem; margin-top: var(--space-3); margin-bottom: var(--space-2); }
 
+.page-header {
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.page-header-title {
+  margin-bottom: var(--space-2);
+}
+
+.page-header-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+}
+
+.page-header-meta i {
+  margin-right: 0.3em;
+}
+
 /* Focus for accessibility */
 a:focus-visible,
 button:focus-visible,
@@ -350,10 +372,31 @@ a.card.card-course {
   border-color: var(--primary-hover);
 }
 
+/* Exercise auth CTA (unauthenticated users on course detail) */
+.exercise-auth-cta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.exercise-auth-cta__text {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.exercise-auth-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
 /* Hero (landing) */
 .hero {
   text-align: center;
   padding: var(--space-6) 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.08);
 }
 
 .hero h1 {
@@ -461,24 +504,26 @@ a.card.card-course {
   margin-bottom: 0;
 }
 
-/* Override Pico CSS so cheatsheet lists have no bullets */
 .cheatsheet-rendered ul,
 .cheatsheet-rendered ol {
   margin: 0 0 var(--space-2);
-  padding-left: 0;
-  list-style: none !important;
-  list-style-type: none !important;
+  padding-left: var(--space-4);
+}
+
+.cheatsheet-rendered ul {
+  list-style: disc;
+}
+
+.cheatsheet-rendered ol {
+  list-style: decimal;
 }
 
 .cheatsheet-rendered li {
   margin-bottom: var(--space-1);
-  list-style: none !important;
-  list-style-type: none !important;
 }
 
 .cheatsheet-rendered li::marker {
-  content: none !important;
-  display: none !important;
+  color: var(--primary);
 }
 
 .cheatsheet-rendered code {
@@ -814,6 +859,13 @@ a.card.card-course {
 .card-grid-actions {
   margin-top: var(--space-4);
   margin-bottom: var(--space-5);
+}
+
+.card-action-icon {
+  font-size: 2rem;
+  color: var(--primary);
+  display: block;
+  margin-bottom: var(--space-3);
 }
 
 .card-action h3 {

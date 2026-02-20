@@ -4,7 +4,16 @@
 {% block title %}{{ course.title }} – CourseForge{% endblock %}
 
 {% block content %}
-<h1>{{ course.title }}</h1>
+<div class="page-header">
+    <h1 class="page-header-title">{{ course.title }}</h1>
+    <div class="page-header-meta">
+        {% if course.created_by %}
+        <span><i class="fa-solid fa-user" aria-hidden="true"></i> {{ course.created_by.username }}</span>
+        {% endif %}
+        <span><i class="fa-solid fa-dumbbell" aria-hidden="true"></i> {{ total_exercises }} exercise{{ total_exercises|pluralize }}</span>
+        <span><i class="fa-regular fa-calendar" aria-hidden="true"></i> {{ course.created_at|date:"N j, Y" }}</span>
+    </div>
+</div>
 
 <section class="card card-spaced">
     <h2>Overview</h2>
@@ -29,7 +38,13 @@
     {% endif %}
     <p class="mb-0"><a href="{% url 'courses:start' course.slug %}" role="button" class="btn-primary">{% if completed_count >= total_exercises %}Review exercises{% else %}Start exercises{% endif %}</a></p>
     {% else %}
-    <p class="mb-0"><a href="{% url 'login' %}">Log in</a> to start exercises.</p>
+    <div class="exercise-auth-cta">
+        <p class="exercise-auth-cta__text">Log in to start practising these exercises.</p>
+        <div class="exercise-auth-cta__actions">
+            <a href="{% url 'login' %}" class="btn-primary">Log in to start</a>
+            <a href="{% url 'register' %}" class="btn-secondary">Register free</a>
+        </div>
+    </div>
     {% endif %}
 </section>
 {% endblock %}

@@ -60,6 +60,9 @@
     0% { transform: translateX(-100%); }
     100% { transform: translateX(400%); }
   }
+  @media (prefers-reduced-motion: reduce) {
+    .generating-progress-bar { animation: none; }
+  }
   .generating-error {
     margin-top: var(--space-3);
     padding: var(--space-3);
