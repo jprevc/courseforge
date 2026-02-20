@@ -1,0 +1,42 @@
+# CourseForge – run app + Postgres for local/deployment testing.
+# Usage:
+#   docker compose up -d
+#   docker compose exec web python manage.py migrate
+#   docker compose exec web python manage.py createsuperuser
+# Then open http://localhost:8000
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: courseforge
+      POSTGRES_USER: courseforge
+      POSTGRES_PASSWORD: courseforge
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U courseforge -d courseforge"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGDATABASE: courseforge
+      PGUSER: courseforge
+      PGPASSWORD: courseforge
+      DEBUG: "True"
+      ALLOWED_HOSTS: "localhost,127.0.0.1,web"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

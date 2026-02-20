@@ -1,0 +1,45 @@
+# Git and IDE
+.git
+.gitignore
+.cursor
+.vscode
+*.swp
+*.swo
+*~
+
+# Python
+.venv
+venv
+__pycache__
+*.py[cod]
+*.egg-info
+.eggs
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+htmlcov
+
+# Local env and secrets
+.env
+.env.*
+!.env.example
+
+# Docs and dev (keep README.md so hatchling can build the package)
+docs/
+*.md
+!README.md
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Tests (optional: remove if you want tests in image)
+tests/
+*_test.py
+test_*.py
+
+# SQLite DB if present (use Postgres in production)
+*.sqlite3
+db.sqlite3
