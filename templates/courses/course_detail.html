@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load markdown_extras %}
 
 {% block title %}{{ course.title }} – CourseForge{% endblock %}
 
@@ -12,7 +13,7 @@
 
 <section class="card" style="margin-bottom: var(--space-4);">
     <h2>Cheatsheet</h2>
-    <pre class="cheatsheet">{{ course.cheatsheet }}</pre>
+    <div class="cheatsheet cheatsheet-rendered">{{ course.cheatsheet|markdown_to_html }}</div>
 </section>
 
 <section class="card">

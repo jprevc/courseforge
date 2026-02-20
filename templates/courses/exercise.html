@@ -8,26 +8,17 @@
 <div class="card exercise-card">
     <h2 class="exercise-question">{{ exercise.question }}</h2>
 
+    {% if exercise.exercise_type == "multiple_choice" %}
     {% if answered %}
-    <div class="exercise-feedback">
-        <p class="feedback-message {% if correct %}feedback-correct{% else %}feedback-incorrect{% endif %}">
-            {% if correct %}Correct!{% else %}Not quite.{% endif %}
-        </p>
-        {% if explanation %}
-        <div class="explanation-block">
-            <h3>Explanation</h3>
-            <p>{{ explanation }}</p>
-        </div>
-        {% endif %}
-        <p class="exercise-next">
-            {% if index|add:1 < total %}
-            <a href="{% url 'courses:exercise' course.slug index|add:1 %}" class="btn-primary">Next exercise</a>
-            {% else %}
-            <a href="{% url 'courses:detail' course.slug %}" class="btn-primary">Back to course</a>
-            {% endif %}
-        </p>
-    </div>
-    {% elif exercise.exercise_type == "multiple_choice" %}
+    <ul class="exercise-options option-list exercise-options-answered">
+        {% for option in exercise.payload.options %}
+        <li class="option-card {% if forloop.counter0 == selected_answer %}option-card-selected{% endif %}">
+            <span class="option-text">{{ option }}</span>
+            {% if forloop.counter0 == selected_answer %}<span class="option-your-answer">Your answer</span>{% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
     <form method="post" action="">
         {% csrf_token %}
         <ul class="exercise-options option-list">
@@ -42,7 +33,20 @@
         </ul>
         <button type="submit" class="btn-primary">Submit</button>
     </form>
+    {% endif %}
+
     {% elif exercise.exercise_type == "matching_pairs" %}
+    {% if answered %}
+    <ul class="exercise-options matching-list exercise-options-answered">
+        {% for row in matching_result %}
+        <li class="matching-row matching-row-answered">
+            <span class="matching-left">{{ row.left }}</span>
+            <span class="matching-your">You: {{ row.user_right }}</span>
+            <span class="matching-correct">Correct: {{ row.correct_right }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
     <form method="post" action="">
         {% csrf_token %}
         <ul class="exercise-options matching-list">
@@ -62,6 +66,28 @@
         </ul>
         <button type="submit" class="btn-primary">Submit</button>
     </form>
+    {% endif %}
+    {% endif %}
+
+    {% if answered %}
+    <div class="exercise-feedback">
+        <p class="feedback-message {% if correct %}feedback-correct{% else %}feedback-incorrect{% endif %}">
+            {% if correct %}Correct!{% else %}Not quite.{% endif %}
+        </p>
+        {% if explanation %}
+        <div class="explanation-block">
+            <h3>Explanation</h3>
+            <p>{{ explanation }}</p>
+        </div>
+        {% endif %}
+        <p class="exercise-next">
+            {% if index|add:1 < total %}
+            <a href="{% url 'courses:exercise' course.slug index|add:1 %}" class="btn-primary">Next exercise</a>
+            {% else %}
+            <a href="{% url 'courses:detail' course.slug %}" class="btn-primary">Back to course</a>
+            {% endif %}
+        </p>
+    </div>
     {% endif %}
 </div>
 {% endblock %}

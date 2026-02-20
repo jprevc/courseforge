@@ -10,6 +10,7 @@ dependencies = [
     "pydantic>=2",
     "psycopg2-binary",
     "python-dotenv",
+    "markdown>=3.5",
 ]
 
 [dependency-groups]

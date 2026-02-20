@@ -237,37 +237,62 @@ def exercise_view(request: HttpRequest, slug: str, index: int) -> HttpResponse:
 
     if request.method == "POST":
         correct = False
+        selected_answer = None
+        matching_result = None
         if exercise.exercise_type == Exercise.ExerciseType.MULTIPLE_CHOICE:
-            correct = _check_multiple_choice(exercise, request.POST.get("answer"))
+            selected_answer = request.POST.get("answer")
+            correct = _check_multiple_choice(exercise, selected_answer)
         elif exercise.exercise_type == Exercise.ExerciseType.MATCHING_PAIRS:
-            selected = {i: request.POST.get(f"match_{i}") for i in range(len(exercise.payload.get("pairs", [])))}
+            pairs = exercise.payload.get("pairs", [])
+            selected = {i: request.POST.get(f"match_{i}") for i in range(len(pairs))}
             correct = _check_matching(exercise, selected)
+            # Build read-only result for template: list of {left, correct_right, user_right}
+            matching_result = []
+            for i in range(len(pairs)):
+                try:
+                    user_idx = int(selected.get(i)) if selected.get(i) else None
+                except (TypeError, ValueError):
+                    user_idx = None
+                matching_result.append({
+                    "left": pairs[i]["left"],
+                    "correct_right": pairs[i]["right"],
+                    "user_right": pairs[user_idx]["right"] if user_idx is not None and 0 <= user_idx < len(pairs) else "—",
+                })
         UserProgress.objects.create(
             user=request.user,
             exercise=exercise,
             correct=correct,
         )
-        # Redirect to same exercise with answered=1 so we can show feedback and explanation
-        correct_param = "1" if correct else "0"
-        url = reverse("courses:exercise", kwargs={"slug": slug, "index": index})
-        return redirect(f"{url}?answered=1&correct={correct_param}")
+        # Render same page with feedback below answers (no redirect)
+        context = {
+            "course": course,
+            "exercise": exercise,
+            "index": index,
+            "total": len(exercises),
+            "answered": True,
+            "correct": correct,
+            "explanation": exercise.payload.get("explanation", ""),
+            "selected_answer": int(selected_answer) if selected_answer not in (None, "") else None,
+            "matching_result": matching_result,
+        }
+        return render(request, "courses/exercise.html", context)
 
-    # GET: prepare context for template
-    answered = request.GET.get("answered") == "1"
+    # GET: prepare context for template (first view of exercise)
     context = {
         "course": course,
         "exercise": exercise,
         "index": index,
         "total": len(exercises),
-        "answered": answered,
-        "correct": request.GET.get("correct") == "1" if answered else None,
-        "explanation": exercise.payload.get("explanation", "") if answered else "",
+        "answered": False,
+        "correct": None,
+        "explanation": "",
+        "selected_answer": None,
+        "matching_result": None,
     }
     if exercise.exercise_type == Exercise.ExerciseType.MATCHING_PAIRS:
         pairs = exercise.payload.get("pairs", [])
         right_indices = list(range(len(pairs)))
         random.shuffle(right_indices)
         context["left_items"] = [p["left"] for p in pairs]
-        # Options for each dropdown: (original_index, display_text) in shuffled order
         context["right_options"] = [(right_indices[k], pairs[right_indices[k]]["right"]) for k in range(len(pairs))]
     return render(request, "courses/exercise.html", context)
