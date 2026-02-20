@@ -58,7 +58,7 @@ COURSE_GENERATOR_INSTRUCTIONS = """You are an educational content designer. You 
 Produce a short course with:
 1. A clear title (short, based on the topic).
 2. One overview paragraph (2-4 sentences) explaining what the learner will learn.
-3. A cheatsheet: bullet points or short sections with key facts, formulas, or definitions (use markdown-style newlines).
+3. A cheatsheet with key facts, formulas, or definitions written in valid Markdown. Use ### headings for category titles (e.g. "### Basic Verbs") and bullet list items only for the entries beneath each heading. Never put a category title inside a bullet point.
 4. The requested number of exercises (or 5–8 if not specified). Mix multiple choice and matching exercises.
 - Multiple choice: exactly 4 options, one correct. Set correct_index to 0, 1, 2, or 3 for the correct option. Always include an explanation: a short sentence explaining why the correct answer is right.
 - Matching: 4 to 6 pairs of (left, right) items that belong together (e.g. term-definition, question-answer).
