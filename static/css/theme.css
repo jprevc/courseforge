@@ -700,8 +700,8 @@ body.exercise-mode {
 }
 
 .exercise-mode main.container {
-  height: 100dvh;
   height: 100vh;
+  height: 100dvh;
   max-width: 1280px;
   margin: 0 auto;
   padding: var(--space-4);
@@ -782,6 +782,57 @@ body.exercise-mode {
 
 .exercise-feedback .explanation-block {
   margin-top: 0;
+}
+
+/* Compact layout on small screens so exercise fits in viewport */
+@media (max-width: 640px) {
+  .exercise-mode main.container {
+    padding: var(--space-2);
+  }
+
+  .exercise-mode .exercise-card {
+    padding: 0.75rem;
+  }
+
+  .exercise-mode .exercise-breadcrumb {
+    margin-bottom: var(--space-1);
+  }
+
+  .exercise-mode .exercise-progress-bar-wrap {
+    margin-bottom: var(--space-2);
+  }
+
+  .exercise-mode .exercise-card .exercise-question {
+    font-size: 1.1rem;
+    margin-bottom: var(--space-2);
+  }
+
+  .exercise-mode .exercise-options {
+    margin-bottom: var(--space-2);
+  }
+
+  .exercise-mode .option-list {
+    grid-auto-rows: minmax(2.5rem, auto);
+    gap: var(--space-2);
+  }
+
+  .exercise-mode .option-list .option-card label,
+  .exercise-mode .exercise-options-answered .option-card {
+    padding: var(--space-2);
+  }
+
+  .exercise-mode .exercise-feedback {
+    margin-top: var(--space-2);
+    padding-top: var(--space-2);
+  }
+
+  .exercise-mode .exercise-feedback .feedback-message {
+    font-size: 1rem;
+  }
+
+  .exercise-mode .matching-tile {
+    padding: var(--space-2);
+  }
 }
 
 .exercise-options {

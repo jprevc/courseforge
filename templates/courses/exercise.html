@@ -162,6 +162,12 @@
         </div>
         {% endif %}
     </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var btn = document.querySelector('.exercise-action-btn');
+        if (btn) btn.scrollIntoView({ behavior: 'instant', block: 'nearest' });
+      });
+    </script>
     {% endif %}
 </div>
 </div>
