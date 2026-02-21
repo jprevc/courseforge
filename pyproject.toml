@@ -24,6 +24,7 @@ dev = [
     "black>=24.0",
     "django-stubs>=5.0",
     "django-extensions",
+    "pre-commit>=4.0",
 ]
 
 [build-system]
