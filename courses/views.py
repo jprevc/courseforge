@@ -39,7 +39,7 @@ def _run_generation(
         job.status_message = "Generating course outline..."
         job.save(update_fields=["status_message"])
 
-        content = run_course_generator_sync(
+        content, generation_model = run_course_generator_sync(
             topic=topic,
             difficulty=difficulty,
             additional_instructions=additional_instructions,
@@ -62,6 +62,7 @@ def _run_generation(
             cheatsheet=content.cheatsheet,
             created_by=user,
             topic_normalized=topic.lower()[:255],
+            generation_model=generation_model,
         )
         for i, item in enumerate(content.exercises):
             if item.type == "multiple_choice" and item.multiple_choice:

@@ -19,6 +19,12 @@ class Course(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     topic_normalized = models.CharField(max_length=255, blank=True, db_index=True)
+    generation_model = models.CharField(
+        max_length=128,
+        blank=True,
+        default="",
+        help_text="LLM model used to generate this course (e.g. openai:gpt-5-mini). Empty for courses created before this was tracked.",
+    )
 
     class Meta:
         ordering = ["-created_at"]

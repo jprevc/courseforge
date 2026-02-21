@@ -1,9 +1,9 @@
 """
 Thin wrapper to run the course generator agent. Called by Django views.
-Returns CourseContent or raises on failure.
+Returns (CourseContent, model_name) or raises on failure.
 """
 
-from agent.agent import CourseContent, get_agent
+from agent.agent import CourseContent, get_agent, get_agent_model
 
 
 def run_course_generator_sync(
@@ -11,8 +11,8 @@ def run_course_generator_sync(
     difficulty: str = "beginner",
     additional_instructions: str | None = None,
     num_exercises: int | None = None,
-) -> CourseContent:
-    """Generate course content for the given topic and options. Blocks until done."""
+) -> tuple[CourseContent, str]:
+    """Generate course content for the given topic and options. Blocks until done. Returns (content, model_used)."""
     parts = [f"Topic: {topic.strip()}", f"Difficulty: {difficulty.strip().capitalize()}"]
     if additional_instructions and additional_instructions.strip():
         parts.append(f"Additional instructions: {additional_instructions.strip()}")
@@ -24,4 +24,4 @@ def run_course_generator_sync(
     output = result.output
     if not output:
         raise RuntimeError("Agent returned no output")
-    return output
+    return output, get_agent_model()

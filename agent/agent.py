@@ -79,12 +79,17 @@ def get_course_generator_agent(model: str = "openai:gpt-4o-mini") -> Agent[None,
 _course_agent = None
 
 
+def get_agent_model() -> str:
+    """Return the model string used for course generation (env or default). Same as used by get_agent()."""
+    import os
+
+    return os.environ.get("COURSEFORGE_LLM_MODEL", "openai:gpt-5-mini")
+
+
 def get_agent() -> Agent[None, CourseContent]:
     """Return the default course generator agent (lazy init, model from env or default)."""
     global _course_agent
     if _course_agent is None:
-        import os
-
-        model = os.environ.get("COURSEFORGE_LLM_MODEL", "openai:gpt-4o-mini")
+        model = get_agent_model()
         _course_agent = get_course_generator_agent(model=model)
     return _course_agent
