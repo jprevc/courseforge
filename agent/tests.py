@@ -23,6 +23,7 @@ def test_course_content_model_parses_valid_output() -> None:
                     "question": "What is the result of [x*2 for x in [1,2,3]]?",
                     "options": ["[2,4,6]", "[1,2,3]", "[]", "Error"],
                     "correct_index": 0,
+                    "explanation": "Each element is multiplied by 2.",
                 },
                 "matching": None,
             },
