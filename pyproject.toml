@@ -25,6 +25,7 @@ dev = [
     "django-stubs>=5.0",
     "django-extensions",
     "pre-commit>=4.0",
+    "types-Markdown",
 ]
 
 [build-system]

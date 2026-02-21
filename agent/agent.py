@@ -65,7 +65,7 @@ Produce a short course with:
 Keep explanations clear and concise. Make exercises fun and instructive. Always respect the difficulty level and any additional instructions."""
 
 
-def get_course_generator_agent(model: str = "openai:gpt-4o-mini") -> Agent:
+def get_course_generator_agent(model: str = "openai:gpt-4o-mini") -> Agent[None, CourseContent]:
     """Build the course generator agent with the given model string (e.g. openai:gpt-4o-mini)."""
     return Agent(
         model,
@@ -79,7 +79,7 @@ def get_course_generator_agent(model: str = "openai:gpt-4o-mini") -> Agent:
 _course_agent = None
 
 
-def get_agent() -> Agent:
+def get_agent() -> Agent[None, CourseContent]:
     """Return the default course generator agent (lazy init, model from env or default)."""
     global _course_agent
     if _course_agent is None:

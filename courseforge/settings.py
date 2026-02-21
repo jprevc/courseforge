@@ -98,7 +98,7 @@ _default_db = (
     if os.environ.get("PGHOST")
     else {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": str(BASE_DIR / "db.sqlite3"),
     }
 )
 DATABASES = {"default": _default_db}

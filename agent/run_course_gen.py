@@ -21,6 +21,7 @@ def run_course_generator_sync(
     prompt = "\n\n".join(parts)
     agent = get_agent()
     result = agent.run_sync(prompt)
-    if not result.output:
+    output = result.output
+    if not output:
         raise RuntimeError("Agent returned no output")
-    return result.output
+    return output

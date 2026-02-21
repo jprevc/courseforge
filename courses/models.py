@@ -39,9 +39,7 @@ class CourseGenerationJob(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING)
     status_message = models.CharField(max_length=255, blank=True)
-    course = models.ForeignKey(
-        Course, null=True, blank=True, on_delete=models.SET_NULL, related_name="generation_jobs"
-    )
+    course = models.ForeignKey(Course, null=True, blank=True, on_delete=models.SET_NULL, related_name="generation_jobs")
     error = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

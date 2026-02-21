@@ -157,7 +157,7 @@ def job_status_api(request: HttpRequest, job_id: str) -> HttpResponse:
     data = {
         "status": job.status,
         "message": job.status_message or "",
-        "course_slug": job.course.slug if job.course_id else None,
+        "course_slug": job.course.slug if job.course else None,
         "error": job.error or "",
     }
     return JsonResponse(data)
@@ -215,8 +215,11 @@ def _check_matching(exercise: Exercise, selected_by_left: dict[int, Any]) -> boo
     if len(selected_by_left) != len(pairs):
         return False
     for i in range(len(pairs)):
+        val = selected_by_left.get(i)
+        if val is None:
+            return False
         try:
-            if int(selected_by_left.get(i)) != i:
+            if int(val) != i:
                 return False
         except (TypeError, ValueError):
             return False
@@ -247,17 +250,23 @@ def exercise_view(request: HttpRequest, slug: str, index: int) -> HttpResponse:
             matching_result = []
             for i in range(len(pairs)):
                 try:
-                    user_idx = int(selected.get(i)) if selected.get(i) else None
+                    raw = selected.get(i)
+                    user_idx = int(raw) if raw is not None and raw != "" else None
                 except (TypeError, ValueError):
                     user_idx = None
-                matching_result.append({
-                    "left": pairs[i]["left"],
-                    "correct_right": pairs[i]["right"],
-                    "user_right": pairs[user_idx]["right"] if user_idx is not None and 0 <= user_idx < len(pairs) else "—",
-                    "is_correct": user_idx == i,
-                })
+                matching_result.append(
+                    {
+                        "left": pairs[i]["left"],
+                        "correct_right": pairs[i]["right"],
+                        "user_right": (
+                            pairs[user_idx]["right"] if user_idx is not None and 0 <= user_idx < len(pairs) else "—"
+                        ),
+                        "is_correct": user_idx == i,
+                    }
+                )
+        # @login_required guarantees request.user is the concrete user model
         UserProgress.objects.create(
-            user=request.user,
+            user=request.user,  # type: ignore[misc]
             exercise=exercise,
             correct=correct,
         )
@@ -270,7 +279,9 @@ def exercise_view(request: HttpRequest, slug: str, index: int) -> HttpResponse:
             "answered": True,
             "correct": correct,
             "explanation": exercise.payload.get("explanation", ""),
-            "selected_answer": int(selected_answer) if selected_answer not in (None, "") else None,
+            "selected_answer": (
+                int(selected_answer) if isinstance(selected_answer, str) and selected_answer != "" else None
+            ),
             "matching_result": matching_result,
         }
         return render(request, "courses/exercise.html", context)
