@@ -77,7 +77,7 @@
         {% for left in left_items %}
         <input type="hidden" name="match_{{ forloop.counter0 }}" id="match-input-{{ forloop.counter0 }}">
         {% endfor %}
-        <div class="matching-columns">
+        <div class="matching-columns" style="--matching-rows: {{ left_items|length }}">
             <div class="matching-col" id="left-col">
                 {% for left in left_items %}
                 <div class="matching-tile"
