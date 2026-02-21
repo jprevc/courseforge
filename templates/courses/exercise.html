@@ -3,9 +3,10 @@
 {% block title %}Exercise {{ index|add:1 }} of {{ total }} – {{ course.title }}{% endblock %}
 
 {% block content %}
+<div class="exercise-viewport">
 <p class="exercise-breadcrumb"><a href="{% url 'courses:detail' course.slug %}">{{ course.title }}</a> – Exercise {{ index|add:1 }} of {{ total }}</p>
 
-<div class="card exercise-card">
+<div class="card exercise-card" id="exercise-anchor">
     <div class="exercise-progress-bar-wrap">
         <div class="progress-bar">
             <div class="progress-bar-fill" style="width: {% widthratio index|add:1 total 100 %}%"></div>
@@ -24,6 +25,11 @@
         </li>
         {% endfor %}
     </ul>
+    {% if index|add:1 < total %}
+    <a href="{% url 'courses:exercise' course.slug index|add:1 %}" class="btn-primary exercise-action-btn">Next exercise</a>
+    {% else %}
+    <a href="{% url 'courses:detail' course.slug %}" class="btn-primary exercise-action-btn">Back to course</a>
+    {% endif %}
     {% else %}
     <form method="post" action="">
         {% csrf_token %}
@@ -37,7 +43,7 @@
             </li>
             {% endfor %}
         </ul>
-        <button type="submit" class="btn-primary">Submit</button>
+        <button type="submit" class="btn-primary exercise-action-btn">Submit</button>
     </form>
     {% endif %}
 
@@ -60,6 +66,11 @@
         </div>
         {% endfor %}
     </div>
+    {% if index|add:1 < total %}
+    <a href="{% url 'courses:exercise' course.slug index|add:1 %}" class="btn-primary exercise-action-btn">Next exercise</a>
+    {% else %}
+    <a href="{% url 'courses:detail' course.slug %}" class="btn-primary exercise-action-btn">Back to course</a>
+    {% endif %}
     {% else %}
     <form method="post" action="" id="matching-form">
         {% csrf_token %}
@@ -82,7 +93,7 @@
                 {% endfor %}
             </div>
         </div>
-        <button type="submit" class="btn-primary" id="matching-submit" disabled>Submit</button>
+        <button type="submit" class="btn-primary exercise-action-btn" id="matching-submit" disabled>Submit</button>
     </form>
     <script>
     (function () {
@@ -150,14 +161,8 @@
             <p>{{ explanation }}</p>
         </div>
         {% endif %}
-        <p class="exercise-next">
-            {% if index|add:1 < total %}
-            <a href="{% url 'courses:exercise' course.slug index|add:1 %}" class="btn-primary">Next exercise</a>
-            {% else %}
-            <a href="{% url 'courses:detail' course.slug %}" class="btn-primary">Back to course</a>
-            {% endif %}
-        </p>
     </div>
     {% endif %}
+</div>
 </div>
 {% endblock %}

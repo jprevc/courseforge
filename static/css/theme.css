@@ -688,6 +688,49 @@ a.card.card-course {
 }
 
 /* Exercise page */
+
+/* Exercise mode: full viewport, no header/footer, no page scroll */
+.exercise-mode .site-header,
+.exercise-mode .site-footer {
+  display: none;
+}
+
+body.exercise-mode {
+  padding: 0;
+}
+
+.exercise-mode main.container {
+  height: 100dvh;
+  height: 100vh;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.exercise-viewport {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.exercise-viewport .exercise-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.exercise-mode .exercise-breadcrumb {
+  margin-bottom: var(--space-2);
+  flex-shrink: 0;
+}
+
 .exercise-breadcrumb {
   font-size: 0.9375rem;
   color: var(--text-muted);
@@ -699,14 +742,34 @@ a.card.card-course {
   margin-bottom: var(--space-4);
 }
 
+/* Normalize submit button and next-exercise link to identical size/position */
+.exercise-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 8rem;
+  margin-bottom: 0;
+  box-sizing: border-box;
+}
+
+/* Remove PicoCSS default form margin so the options+button layout
+   matches the answered state (options+link) pixel-for-pixel */
+.exercise-card form {
+  margin-bottom: 0;
+}
+
+/* Feedback section: tight spacing immediately below the action button */
 .exercise-feedback {
-  margin-top: var(--space-2);
+  margin-top: var(--space-4);
+  border-top: 1px solid var(--border-strong);
+  padding-top: var(--space-3);
 }
 
 .exercise-feedback .feedback-message {
   font-size: 1.125rem;
   font-weight: 600;
-  margin-bottom: var(--space-4);
+  margin: 0 0 var(--space-2);
 }
 
 .exercise-feedback .feedback-correct {
@@ -718,34 +781,7 @@ a.card.card-course {
 }
 
 .exercise-feedback .explanation-block {
-  padding: var(--space-4);
-  background: var(--surface-elevated);
-  border-radius: var(--radius);
-  border-left: 4px solid var(--primary);
-  margin-bottom: var(--space-4);
-}
-
-.exercise-feedback .explanation-block h3 {
   margin-top: 0;
-  margin-bottom: var(--space-2);
-  font-size: 1rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.exercise-feedback .explanation-block p {
-  margin: 0;
-}
-
-.exercise-feedback .exercise-next {
-  margin-bottom: 0;
-}
-
-/* Submit button: narrow, not full width */
-.exercise-card .btn-primary[type="submit"] {
-  width: auto;
-  min-width: 8rem;
 }
 
 .exercise-options {
@@ -757,6 +793,7 @@ a.card.card-course {
 .option-list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: minmax(5rem, auto);
   gap: var(--space-3);
 }
 
@@ -771,19 +808,21 @@ a.card.card-course {
 
 .option-list .option-card label {
   flex: 1;
-  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .option-card label {
   position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  border: 2px solid var(--border-strong);
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .option-card label:hover {
@@ -833,19 +872,20 @@ a.card.card-course {
 /* Answered state: show choices read-only, then feedback below */
 .exercise-options-answered {
   pointer-events: none;
+  grid-auto-rows: minmax(5rem, auto);
 }
 
 .exercise-options-answered .option-card {
   opacity: 0.9;
-}
-
-.exercise-options-answered .option-card {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-2);
   padding: var(--space-3);
   border: 2px solid var(--border-strong);
   border-radius: var(--radius);
+  box-sizing: border-box;
 }
 
 .exercise-options-answered .option-card-selected {
@@ -857,7 +897,6 @@ a.card.card-course {
   font-size: 0.875rem;
   color: var(--primary);
   font-weight: 500;
-  margin-left: auto;
 }
 
 .matching-row-answered {
