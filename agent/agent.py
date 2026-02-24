@@ -41,7 +41,7 @@ class ExerciseItem(BaseModel):
 
 
 class FlashcardItem(BaseModel):
-    """One flashcard: short front (prompt) and detailed back (answer)."""
+    """One flashcard: short front (prompt) and short back (answer, max ~3 words each)."""
 
     front: str
     back: str
@@ -74,8 +74,8 @@ Produce a short course with:
 - Multiple choice: exactly 4 options, one correct. Set correct_index to 0, 1, 2, or 3 for the correct option. Always include an explanation: a short sentence explaining why the correct answer is right.
 - Matching: 4 to 6 pairs of (left, right) items that belong together (e.g. term-definition, question-answer).
 - Flashcards: When flashcards are requested, generate the requested number of flashcards (or 5–10 if not specified). Each flashcard must have:
-  - front: a short key term, concept name, or brief question.
-  - back: a clear, self-contained answer or definition that would help a learner recall and understand the concept.
+  - front: a very short key term, concept name, or brief question (at most 3 words).
+  - back: a very short answer or definition (at most 3 words, not a full sentence) that helps the learner recall the concept.
 
 Keep explanations clear and concise. Make exercises fun and instructive. Always respect the difficulty level and any additional instructions."""
 
