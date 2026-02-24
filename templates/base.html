@@ -126,6 +126,54 @@
                     row.href = `/courses/${item.course_slug}/`;
                 }
 
+                const notificationId = item.id;
+                if (notificationId) {
+                    row.addEventListener("click", (event) => {
+                        event.stopPropagation();
+                        const csrftoken = getCookie("csrftoken");
+                        const url = `/courses/api/notifications/${notificationId}/read/`;
+                        const hasTarget = !!item.course_slug;
+                        const targetHref = hasTarget ? `/courses/${item.course_slug}/` : null;
+
+                        // Prevent immediate navigation so we can reliably mark as read first.
+                        if (hasTarget) {
+                            event.preventDefault();
+                        }
+
+                        fetch(url, {
+                            method: "POST",
+                            credentials: "same-origin",
+                            headers: {
+                                "X-Requested-With": "XMLHttpRequest",
+                                "X-CSRFToken": csrftoken || "",
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({})
+                        })
+                            .then((response) => {
+                                if (!response.ok) {
+                                    throw new Error("Failed to mark notification as read");
+                                }
+                                return response.json();
+                            })
+                            .then(() => {
+                                if (targetHref) {
+                                    window.location.href = targetHref;
+                                } else {
+                                    // Refresh notifications list and badge count.
+                                    pollNotifications();
+                                }
+                            })
+                            .catch((error) => {
+                                console.error(error);
+                                // On error, fall back to navigation if a target exists.
+                                if (targetHref) {
+                                    window.location.href = targetHref;
+                                }
+                            });
+                    });
+                }
+
                 list.appendChild(row);
             });
         }

@@ -252,6 +252,17 @@ def api_mark_all_notifications_read(request: HttpRequest) -> HttpResponse:
     return JsonResponse({"success": True})
 
 
+@login_required
+def api_mark_notification_read(request: HttpRequest, notification_id: int) -> HttpResponse:
+    """Mark a single notification as read for the current user."""
+    if request.method != "POST":
+        return JsonResponse({"detail": "Method not allowed."}, status=405)
+    user_id = request.user.id
+    assert user_id is not None
+    updated = Notification.objects.filter(id=notification_id, user_id=user_id, read=False).update(read=True)
+    return JsonResponse({"success": True, "updated": updated})
+
+
 def course_detail(request: HttpRequest, slug: str) -> HttpResponse:
     """Show course overview, cheatsheet, exercise count, and progress (X/Y) for the current user."""
     course = get_object_or_404(Course, slug=slug)

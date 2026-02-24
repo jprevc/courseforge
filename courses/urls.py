@@ -30,6 +30,11 @@ urlpatterns = [
     path("api/job-status/<uuid:job_id>/", views.job_status_api, name="job_status"),
     path("api/notifications/", views.api_notifications, name="notifications"),
     path("api/notifications/mark-all-read/", views.api_mark_all_notifications_read, name="notifications_mark_read"),
+    path(
+        "api/notifications/<int:notification_id>/read/",
+        views.api_mark_notification_read,
+        name="notification_mark_read",
+    ),
     path("<uslug:slug>/", views.course_detail, name="detail"),
     path("<uslug:slug>/start/", views.course_start, name="start"),
     path("<uslug:slug>/flashcards/", views.flashcards_view, name="flashcards"),
