@@ -13,9 +13,11 @@
     {% for job in pending_jobs %}
     <div class="card card-course card-pending" id="pending-job-{{ job.id }}" data-job-id="{{ job.id }}">
         <strong class="card-course-title">{{ job.topic }}</strong>
-        <span class="badge-pending">
-            <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Generating…
-        </span>
+        <div class="card-course-meta">
+            <span class="badge-pending">
+                <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Generating…
+            </span>
+        </div>
     </div>
     {% endfor %}
 </div>

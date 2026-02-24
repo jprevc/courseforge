@@ -22,9 +22,9 @@
             </ul>
             {% if user.is_authenticated %}
             <ul class="nav-center">
-                <li><a href="{% url 'dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}><i class="fa-solid fa-gauge nav-icon" aria-hidden="true"></i>Dashboard</a></li>
-                <li><a href="{% url 'courses:list' %}" {% if request.resolver_match.namespace == 'courses' and request.resolver_match.url_name == 'list' %}aria-current="page"{% endif %}><i class="fa-solid fa-book nav-icon" aria-hidden="true"></i>Browse courses</a></li>
-                <li><a href="{% url 'courses:create' %}" {% if request.resolver_match.namespace == 'courses' and request.resolver_match.url_name == 'create' %}aria-current="page"{% endif %}><i class="fa-solid fa-plus nav-icon" aria-hidden="true"></i>Create course</a></li>
+                <li><a href="{% url 'dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}><i class="fa-solid fa-gauge nav-icon" aria-hidden="true"></i><span class="nav-link-text">Dashboard</span></a></li>
+                <li><a href="{% url 'courses:list' %}" {% if request.resolver_match.namespace == 'courses' and request.resolver_match.url_name == 'list' %}aria-current="page"{% endif %}><i class="fa-solid fa-book nav-icon" aria-hidden="true"></i><span class="nav-link-text">Browse courses</span></a></li>
+                <li><a href="{% url 'courses:create' %}" {% if request.resolver_match.namespace == 'courses' and request.resolver_match.url_name == 'create' %}aria-current="page"{% endif %}><i class="fa-solid fa-plus nav-icon" aria-hidden="true"></i><span class="nav-link-text">Create course</span></a></li>
             </ul>
             <ul class="nav-right">
                 <li class="nav-notifications">
@@ -37,12 +37,18 @@
                         <button type="button" id="notif-mark-read">Mark all as read</button>
                     </div>
                 </li>
-                <li><span class="nav-username"><i class="fa-solid fa-user nav-icon" aria-hidden="true"></i>{{ user.username }}</span></li>
-                <li>
-                    <form method="post" action="{% url 'logout' %}" class="inline-form">
-                        {% csrf_token %}
-                        <button type="submit">Log out</button>
-                    </form>
+                <li class="nav-user-dropdown">
+                    <button class="nav-username" id="user-menu-btn" aria-expanded="false" aria-haspopup="true">
+                        <i class="fa-solid fa-user nav-icon" aria-hidden="true"></i>
+                        <span class="nav-username-text">{{ user.username }}</span>
+                        <i class="fa-solid fa-chevron-down nav-chevron" aria-hidden="true"></i>
+                    </button>
+                    <div class="user-dropdown" id="user-dropdown" hidden>
+                        <form method="post" action="{% url 'logout' %}" class="inline-form">
+                            {% csrf_token %}
+                            <button type="submit"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Log out</button>
+                        </form>
+                    </div>
                 </li>
             </ul>
             {% else %}
@@ -111,9 +117,15 @@
             }
 
             items.forEach((item) => {
-                const row = document.createElement("div");
+                const hasCourse = !!item.course_slug;
+                const row = document.createElement(hasCourse ? "a" : "div");
                 row.className = "notif-item";
                 row.textContent = item.message || "";
+
+                if (hasCourse) {
+                    row.href = `/courses/${item.course_slug}/`;
+                }
+
                 list.appendChild(row);
             });
         }
@@ -183,6 +195,36 @@
         // Initial load and polling every 10 seconds
         pollNotifications();
         setInterval(pollNotifications, 10000);
+    })();
+
+    (function () {
+        const userBtn = document.getElementById("user-menu-btn");
+        const userDropdown = document.getElementById("user-dropdown");
+
+        if (!userBtn || !userDropdown) {
+            return;
+        }
+
+        userBtn.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const isHidden = userDropdown.hasAttribute("hidden");
+            if (isHidden) {
+                userDropdown.removeAttribute("hidden");
+                userBtn.setAttribute("aria-expanded", "true");
+            } else {
+                userDropdown.setAttribute("hidden", "hidden");
+                userBtn.setAttribute("aria-expanded", "false");
+            }
+        });
+
+        document.addEventListener("click", (event) => {
+            if (!userDropdown.hasAttribute("hidden")) {
+                if (!userDropdown.contains(event.target) && !userBtn.contains(event.target)) {
+                    userDropdown.setAttribute("hidden", "hidden");
+                    userBtn.setAttribute("aria-expanded", "false");
+                }
+            }
+        });
     })();
     </script>
     {% endif %}

@@ -143,6 +143,7 @@ a, button {
 .site-header nav > ul.nav-right {
   flex: 1;
   justify-content: flex-end;
+  flex-wrap: nowrap;
 }
 
 .site-header nav a[aria-current="page"] {
@@ -277,6 +278,80 @@ a, button {
   color: var(--text);
 }
 
+/* User dropdown (username button + log-out menu) */
+.nav-user-dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.nav-user-dropdown .nav-username {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.9375rem;
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+}
+
+.nav-user-dropdown .nav-username:hover {
+  color: var(--primary-hover);
+}
+
+.nav-chevron {
+  font-size: 0.7em;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+
+.nav-user-dropdown .nav-username[aria-expanded="true"] .nav-chevron {
+  transform: rotate(180deg);
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  min-width: 10rem;
+  padding: var(--space-2) 0;
+  background: var(--surface-elevated);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-md);
+  z-index: 60;
+}
+
+.user-dropdown .inline-form {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+.user-dropdown .inline-form button[type="submit"] {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9375rem;
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+}
+
+.user-dropdown .inline-form button[type="submit"]:hover {
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--primary-hover);
+}
+
 /* Logout form in nav: inline, no layout shift, button looks like link */
 .site-header nav form.inline-form {
   display: inline;
@@ -307,9 +382,9 @@ a, button {
 
 .nav-logo img {
   display: block;
-  height: 112px;
+  height: 80px;
   width: auto;
-  max-height: 112px;
+  max-height: 80px;
   object-fit: contain;
 }
 
@@ -1290,4 +1365,29 @@ body.exercise-mode {
 
 .site-footer a:hover {
   color: var(--primary-hover);
+}
+
+/* Responsive nav: icon-only below 900px */
+@media (max-width: 900px) {
+  .nav-link-text { display: none; }
+  .nav-center .nav-icon { margin-right: 0; }
+}
+
+@media (max-width: 640px) {
+  /* On very small screens, keep bell and user icon on one line and hide username text/chevron */
+  .site-header nav > ul.nav-right {
+    flex: 0 0 auto;
+  }
+
+  .nav-user-dropdown .nav-username-text {
+    display: none;
+  }
+
+  .nav-user-dropdown .nav-icon {
+    margin-right: 0;
+  }
+
+  .nav-chevron {
+    display: none;
+  }
 }
