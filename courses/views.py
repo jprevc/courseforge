@@ -15,7 +15,7 @@ from agent.run_course_gen import run_course_generator_sync
 from progress.models import UserProgress
 
 from .forms import CreateCourseForm
-from .models import Course, CourseGenerationJob, Exercise, Flashcard
+from .models import Course, CourseGenerationJob, Exercise, Flashcard, Notification
 
 
 def _run_generation(
@@ -110,6 +110,11 @@ def _run_generation(
         job.status = CourseGenerationJob.Status.COMPLETE
         job.status_message = "Done!"
         job.save(update_fields=["course", "status", "status_message"])
+        Notification.objects.create(
+            user_id=user_id,
+            message=f'Your course "{course.title}" is ready!',
+            course=course,
+        )
     except Exception as e:
         try:
             close_old_connections()
@@ -118,6 +123,11 @@ def _run_generation(
             job.error = str(e)
             job.status_message = "Failed"
             job.save(update_fields=["status", "error", "status_message"])
+            Notification.objects.create(
+                user_id=user_id,
+                message=f'Course generation failed for "{topic}". Please try again.',
+                course=None,
+            )
         finally:
             close_old_connections()
     finally:
@@ -127,7 +137,23 @@ def _run_generation(
 def course_list(request: HttpRequest) -> HttpResponse:
     """List all courses (browse)."""
     courses = Course.objects.all().order_by("-created_at")
-    return render(request, "courses/course_list.html", {"courses": courses})
+    pending_jobs = CourseGenerationJob.objects.none()
+    if request.user.is_authenticated:
+        pending_jobs = CourseGenerationJob.objects.filter(
+            created_by=request.user,
+            status__in=[
+                CourseGenerationJob.Status.PENDING,
+                CourseGenerationJob.Status.RUNNING,
+            ],
+        ).order_by("-created_at")
+    return render(
+        request,
+        "courses/course_list.html",
+        {
+            "courses": courses,
+            "pending_jobs": pending_jobs,
+        },
+    )
 
 
 @login_required
@@ -147,7 +173,11 @@ def course_create(request: HttpRequest) -> HttpResponse:
     include_flashcards = form.cleaned_data.get("include_flashcards", False)
     num_exercises = form.cleaned_data.get("num_exercises")
     num_flashcards = form.cleaned_data.get("num_flashcards")
-    job = CourseGenerationJob.objects.create(status=CourseGenerationJob.Status.PENDING)
+    job = CourseGenerationJob.objects.create(
+        status=CourseGenerationJob.Status.PENDING,
+        created_by_id=request.user.id,
+        topic=topic[:255],
+    )
     thread = threading.Thread(
         target=_run_generation,
         args=(
@@ -164,7 +194,7 @@ def course_create(request: HttpRequest) -> HttpResponse:
         daemon=True,
     )
     thread.start()
-    return redirect("courses:generating", job_id=job.id)
+    return redirect("courses:list")
 
 
 @login_required
@@ -185,6 +215,41 @@ def job_status_api(request: HttpRequest, job_id: str) -> HttpResponse:
         "error": job.error or "",
     }
     return JsonResponse(data)
+
+
+@login_required
+def api_notifications(request: HttpRequest) -> HttpResponse:
+    """Return JSON with unread notification count and list for the current user."""
+    if request.method != "GET":
+        return JsonResponse({"detail": "Method not allowed."}, status=405)
+    user_id = request.user.id
+    assert user_id is not None
+    qs = Notification.objects.filter(user_id=user_id, read=False).order_by("-created_at")
+    items = [
+        {
+            "id": n.id,
+            "message": n.message,
+            "course_slug": n.course.slug if n.course else None,
+        }
+        for n in qs[:20]
+    ]
+    return JsonResponse(
+        {
+            "count": qs.count(),
+            "items": items,
+        }
+    )
+
+
+@login_required
+def api_mark_all_notifications_read(request: HttpRequest) -> HttpResponse:
+    """Mark all unread notifications for the current user as read."""
+    if request.method != "POST":
+        return JsonResponse({"detail": "Method not allowed."}, status=405)
+    user_id = request.user.id
+    assert user_id is not None
+    Notification.objects.filter(user_id=user_id, read=False).update(read=True)
+    return JsonResponse({"success": True})
 
 
 def course_detail(request: HttpRequest, slug: str) -> HttpResponse:

@@ -27,6 +27,16 @@
                 <li><a href="{% url 'courses:create' %}" {% if request.resolver_match.namespace == 'courses' and request.resolver_match.url_name == 'create' %}aria-current="page"{% endif %}><i class="fa-solid fa-plus nav-icon" aria-hidden="true"></i>Create course</a></li>
             </ul>
             <ul class="nav-right">
+                <li class="nav-notifications">
+                    <button class="notif-bell" id="notif-bell-btn" aria-label="Notifications">
+                        <i class="fa-solid fa-bell" aria-hidden="true"></i>
+                        <span class="notif-badge" id="notif-badge" hidden>0</span>
+                    </button>
+                    <div class="notif-dropdown" id="notif-dropdown" hidden>
+                        <div class="notif-list" id="notif-list"></div>
+                        <button type="button" id="notif-mark-read">Mark all as read</button>
+                    </div>
+                </li>
                 <li><span class="nav-username"><i class="fa-solid fa-user nav-icon" aria-hidden="true"></i>{{ user.username }}</span></li>
                 <li>
                     <form method="post" action="{% url 'logout' %}" class="inline-form">
@@ -56,5 +66,125 @@
     <footer class="site-footer">
         <p>&copy; {% now "Y" %} CourseForge &mdash; <a href="{% url 'home' %}">Home</a> &middot; <a href="{% url 'courses:list' %}">Browse Courses</a></p>
     </footer>
+    {% if user.is_authenticated %}
+    <script>
+    (function () {
+        const bellBtn = document.getElementById("notif-bell-btn");
+        const badge = document.getElementById("notif-badge");
+        const dropdown = document.getElementById("notif-dropdown");
+        const list = document.getElementById("notif-list");
+        const markAllBtn = document.getElementById("notif-mark-read");
+
+        if (!bellBtn || !badge || !dropdown || !list || !markAllBtn) {
+            return;
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) {
+                return parts.pop().split(";").shift();
+            }
+            return null;
+        }
+
+        function renderNotifications(data) {
+            const count = data && typeof data.count === "number" ? data.count : 0;
+
+            if (count > 0) {
+                badge.hidden = false;
+                badge.textContent = String(count);
+            } else {
+                badge.hidden = true;
+                badge.textContent = "0";
+            }
+
+            list.innerHTML = "";
+
+            const items = (data && Array.isArray(data.items)) ? data.items : [];
+            if (!items.length) {
+                const empty = document.createElement("div");
+                empty.className = "notif-empty";
+                empty.textContent = "No notifications";
+                list.appendChild(empty);
+                return;
+            }
+
+            items.forEach((item) => {
+                const row = document.createElement("div");
+                row.className = "notif-item";
+                row.textContent = item.message || "";
+                list.appendChild(row);
+            });
+        }
+
+        function pollNotifications() {
+            fetch("/courses/api/notifications/", {
+                credentials: "same-origin",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("Failed to fetch notifications");
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    renderNotifications(data);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        }
+
+        bellBtn.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const isHidden = dropdown.hasAttribute("hidden");
+            if (isHidden) {
+                dropdown.removeAttribute("hidden");
+            } else {
+                dropdown.setAttribute("hidden", "hidden");
+            }
+        });
+
+        document.addEventListener("click", (event) => {
+            if (!dropdown.hasAttribute("hidden")) {
+                if (!dropdown.contains(event.target) && !bellBtn.contains(event.target)) {
+                    dropdown.setAttribute("hidden", "hidden");
+                }
+            }
+        });
+
+        markAllBtn.addEventListener("click", () => {
+            const csrftoken = getCookie("csrftoken");
+            fetch("/courses/api/notifications/mark-all-read/", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": csrftoken || ""
+                },
+                body: JSON.stringify({})
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("Failed to mark notifications as read");
+                    }
+                    // Refresh notifications after marking as read
+                    pollNotifications();
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        });
+
+        // Initial load and polling every 10 seconds
+        pollNotifications();
+        setInterval(pollNotifications, 10000);
+    })();
+    </script>
+    {% endif %}
 </body>
 </html>

@@ -50,6 +50,14 @@ class CourseGenerationJob(models.Model):
     course = models.ForeignKey(Course, null=True, blank=True, on_delete=models.SET_NULL, related_name="generation_jobs")
     error = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="generation_jobs",
+    )
+    topic = models.CharField(max_length=255, blank=True)
 
     def __str__(self) -> str:
         return f"Job {self.id} ({self.status})"
@@ -92,3 +100,23 @@ class Flashcard(models.Model):
 
     def __str__(self) -> str:
         return f"{self.course.title} – flashcard #{self.order_index}"
+
+
+class Notification(models.Model):
+    """A notification for a user, optionally linked to a course."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="notifications",
+    )
+    message = models.CharField(max_length=500)
+    course = models.ForeignKey(Course, null=True, blank=True, on_delete=models.SET_NULL, related_name="notifications")
+    read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"Notification({self.user_id}): {self.message[:50]}"

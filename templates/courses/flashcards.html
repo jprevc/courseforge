@@ -103,15 +103,26 @@
                 const inClass = delta > 0 ? "slide-in-right" : "slide-in-left";
                 const outDuration = 350;
                 const inDuration = 350;
-
                 card.classList.remove("slide-out-left", "slide-out-right", "slide-in-left", "slide-in-right");
                 card.classList.add(outClass);
 
                 // After the old card has slid out, change the content while off-screen,
-                // reset to the front side, then slide the new card in.
+                // reset to the question side (without a visible flip), then slide the new card in.
                 setTimeout(function () {
                     index = (index + delta + total) % total;
-                    cardInner.classList.remove("is-flipped");
+
+                    // Reset flip state without animating the rotation so the new card
+                    // appears already facing the user when it flies in.
+                    if (cardInner) {
+                        const previousTransition = cardInner.style.transition;
+                        cardInner.style.transition = "none";
+                        cardInner.classList.remove("is-flipped");
+                        // Force reflow so the removal of the class takes effect immediately
+                        // without animating.
+                        void cardInner.offsetHeight;
+                        cardInner.style.transition = previousTransition || "";
+                    }
+
                     render();
 
                     card.classList.remove(outClass);

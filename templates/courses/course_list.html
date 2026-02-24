@@ -8,6 +8,78 @@
 <p><a href="{% url 'courses:create' %}" role="button" class="btn-primary cta-top">Create a new course</a></p>
 {% endif %}
 
+{% if pending_jobs %}
+<div class="card-grid">
+    {% for job in pending_jobs %}
+    <div class="card card-course card-pending" id="pending-job-{{ job.id }}" data-job-id="{{ job.id }}">
+        <strong class="card-course-title">{{ job.topic }}</strong>
+        <span class="badge-pending">
+            <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Generating…
+        </span>
+    </div>
+    {% endfor %}
+</div>
+<script>
+(function () {
+    const POLL_INTERVAL_MS = 3000;
+
+    function pollJobStatus(card) {
+        const jobId = card.dataset.jobId;
+        if (!jobId) {
+            return;
+        }
+
+        fetch(`/courses/api/job-status/${jobId}/`, {
+            headers: {
+                "Accept": "application/json"
+            }
+        })
+            .then(function (response) {
+                if (!response.ok) {
+                    return null;
+                }
+                return response.json();
+            })
+            .then(function (data) {
+                if (!data || !data.status) {
+                    return;
+                }
+
+                if (data.status === "complete" || data.status === "failed") {
+                    card.remove();
+
+                    // If there are no more pending cards, stop polling.
+                    if (!document.querySelector(".card-pending") && window.courseforgePendingJobsIntervalId) {
+                        clearInterval(window.courseforgePendingJobsIntervalId);
+                        window.courseforgePendingJobsIntervalId = null;
+                    }
+                }
+            })
+            .catch(function (error) {
+                console.error("Error checking job status", error);
+            });
+    }
+
+    function pollAllPendingJobs() {
+        const cards = document.querySelectorAll(".card-pending");
+        if (!cards.length && window.courseforgePendingJobsIntervalId) {
+            clearInterval(window.courseforgePendingJobsIntervalId);
+            window.courseforgePendingJobsIntervalId = null;
+            return;
+        }
+
+        cards.forEach(function (card) {
+            pollJobStatus(card);
+        });
+    }
+
+    if (!window.courseforgePendingJobsIntervalId && document.querySelector(".card-pending")) {
+        window.courseforgePendingJobsIntervalId = window.setInterval(pollAllPendingJobs, POLL_INTERVAL_MS);
+    }
+})();
+</script>
+{% endif %}
+
 {% if courses %}
 <div class="card-grid">
     {% for course in courses %}
