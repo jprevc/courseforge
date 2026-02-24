@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="{% static 'css/theme.css' %}">
     {% block extra_head %}{% endblock %}
 </head>
-<body class="{% if request.resolver_match.namespace == 'courses' and request.resolver_match.url_name == 'exercise' %}exercise-mode{% endif %}">
+<body class="{% if request.resolver_match.namespace == 'courses' and request.resolver_match.url_name == 'exercise' or request.resolver_match.namespace == 'courses' and request.resolver_match.url_name == 'flashcards' %}exercise-mode{% endif %}">
     <header class="site-header">
         <nav class="container">
             <ul class="nav-left">
