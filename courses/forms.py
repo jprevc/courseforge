@@ -13,6 +13,7 @@ class CreateCourseForm(forms.Form):
     ]
 
     NUM_EXERCISES_CHOICES = [
+        ("", "Agent decides"),
         (3, "3"),
         (5, "5"),
         (8, "8"),
@@ -58,16 +59,17 @@ class CreateCourseForm(forms.Form):
     )
     num_exercises = forms.TypedChoiceField(
         choices=NUM_EXERCISES_CHOICES,
-        coerce=int,
+        coerce=lambda v: int(v) if v != "" else None,
+        required=False,
         label="Number of exercises",
-        initial=5,
-        help_text="Short quiz (3) to longer course (10).",
+        help_text="Short quiz (3) to longer course (10). Leave blank to let the agent decide.",
     )
     num_flashcards = forms.TypedChoiceField(
-        choices=[(5, "5"), (10, "10"), (15, "15"), (20, "20")],
-        coerce=int,
+        choices=[("", "Agent decides"), (5, "5"), (10, "10"), (15, "15"), (20, "20")],
+        coerce=lambda v: int(v) if v != "" else None,
         required=False,
         label="Number of flashcards",
+        help_text="Leave blank to let the agent decide.",
     )
 
     def clean(self):
