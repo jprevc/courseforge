@@ -1,0 +1,581 @@
+{% extends "base.html" %}
+
+{% block title %}Flashcards – {{ course.title }} – CourseForge{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-header-title">{{ course.title }}</h1>
+    <p class="page-header-meta">
+        <i class="fa-solid fa-clone" aria-hidden="true"></i>
+        {{ total_flashcards }} flashcard{{ total_flashcards|pluralize }}
+    </p>
+</div>
+
+<section class="card card-spaced flashcards-wrapper">
+    {% if not flashcards %}
+    <p>No flashcards are available for this course yet.</p>
+    <p><a href="{% url 'courses:detail' course.slug %}">&larr; Back to course</a></p>
+    {% else %}
+    <header class="flashcards-header">
+        <div class="flashcards-counter">
+            Card <span id="flashcard-current-index">1</span> of <span id="flashcard-total">{{ total_flashcards }}</span>
+        </div>
+    </header>
+
+    <div class="flashcard-stage">
+        <div class="flashcard-card" id="flashcard-card" aria-live="polite">
+            <div class="flashcard-card-inner" id="flashcard-card-inner">
+                <div class="flashcard-face flashcard-face-front" id="flashcard-front">
+                    {{ flashcards.0.front }}
+                </div>
+                <div class="flashcard-face flashcard-face-back" id="flashcard-back">
+                    {{ flashcards.0.back }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flashcards-controls">
+        <button type="button" id="flashcard-prev" class="btn-secondary" aria-label="Previous card">
+            &larr; Previous
+        </button>
+        <button type="button" id="flashcard-next" class="btn-secondary" aria-label="Next card">
+            Next &rarr;
+        </button>
+    </div>
+
+    <p class="flashcards-back-link">
+        <a href="{% url 'courses:detail' course.slug %}">&larr; Back to course overview</a>
+    </p>
+
+    <script>
+        (function () {
+            const data = [
+                {% for card in flashcards %}
+                {
+                    front: {{ card.front|escapejs }},
+                    back: {{ card.back|escapejs }}
+                }{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ];
+
+            const total = data.length;
+            let index = 0;
+
+            const card = document.getElementById("flashcard-card");
+            const cardInner = document.getElementById("flashcard-card-inner");
+            const frontEl = document.getElementById("flashcard-front");
+            const backEl = document.getElementById("flashcard-back");
+            const currentIndexEl = document.getElementById("flashcard-current-index");
+            const totalEl = document.getElementById("flashcard-total");
+            const prevBtn = document.getElementById("flashcard-prev");
+            const nextBtn = document.getElementById("flashcard-next");
+
+            if (!card || !cardInner || !frontEl || !backEl || !currentIndexEl || !totalEl) {
+                return;
+            }
+
+            totalEl.textContent = total.toString();
+
+            function render() {
+                const item = data[index];
+                frontEl.textContent = item.front;
+                backEl.textContent = item.back;
+                currentIndexEl.textContent = (index + 1).toString();
+            }
+
+            function flip() {
+                cardInner.classList.toggle("is-flipped");
+            }
+
+            function go(delta) {
+                index = (index + delta + total) % total;
+                if (cardInner.classList.contains("is-flipped")) {
+                    cardInner.classList.remove("is-flipped");
+                }
+                render();
+            }
+
+            card.addEventListener("click", function () {
+                flip();
+            });
+
+            prevBtn.addEventListener("click", function () {
+                go(-1);
+            });
+
+            nextBtn.addEventListener("click", function () {
+                go(1);
+            });
+
+            render();
+        })();
+    </script>
+
+    <style>
+        .flashcards-wrapper {
+            text-align: center;
+        }
+
+        .flashcards-header {
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .flashcard-stage {
+            perspective: 1200px;
+            margin: 1.5rem auto;
+            max-width: 520px;
+        }
+
+        .flashcard-card {
+            cursor: pointer;
+        }
+
+        .flashcard-card-inner {
+            position: relative;
+            width: 100%;
+            min-height: 210px;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+
+        .flashcard-card-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            border-radius: 0.8rem;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            background: rgba(15, 23, 42, 0.85);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+        }
+
+        .flashcard-face-front {
+            border: 1px solid rgba(96, 165, 250, 0.7);
+        }
+
+        .flashcard-face-back {
+            transform: rotateY(180deg);
+            border: 1px solid rgba(52, 211, 153, 0.7);
+        }
+
+        .flashcards-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .flashcards-back-link {
+            margin-top: 1.5rem;
+        }
+
+        @media (max-width: 600px) {
+            .flashcard-card-inner {
+                min-height: 180px;
+                padding: 1.25rem;
+            }
+        }
+    </style>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% extends "base.html" %}
+
+{% block title %}{{ course.title }} – Flashcards – CourseForge{% endblock %}
+
+{% block extra_head %}
+<style>
+    .flashcards-layout {
+        max-width: 700px;
+        margin: 2rem auto;
+        text-align: center;
+    }
+
+    .flashcards-layout h1 {
+        margin-bottom: 0.25rem;
+    }
+
+    .flashcard-subtitle {
+        margin-bottom: 1.5rem;
+        opacity: 0.8;
+        font-size: 0.95rem;
+    }
+
+    .flashcard-counter {
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        opacity: 0.85;
+    }
+
+    .flashcard-scene {
+        perspective: 1200px;
+        margin-bottom: 1.5rem;
+    }
+
+    .flashcard {
+        position: relative;
+        width: 100%;
+        min-height: 200px;
+        transform-style: preserve-3d;
+        transition: transform 0.4s ease;
+        cursor: pointer;
+    }
+
+    .flashcard.is-flipped {
+        transform: rotateY(180deg);
+    }
+
+    .flashcard-face {
+        position: absolute;
+        inset: 0;
+        padding: 2rem;
+        border-radius: 0.75rem;
+        border: 1px solid var(--pico-border-color, #2b2b2b);
+        background: var(--pico-card-background-color, #111);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backface-visibility: hidden;
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+
+    .flashcard-face.back {
+        transform: rotateY(180deg);
+    }
+
+    .flashcard-face p {
+        margin: 0;
+        white-space: pre-wrap;
+    }
+
+    .flashcard-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .flashcard-nav button[disabled] {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    .flashcards-back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flashcards-layout">
+    <a href="{% url 'courses:detail' course.slug %}" class="flashcards-back-link">
+        <span aria-hidden="true">←</span>
+        <span>Back to course</span>
+    </a>
+
+    <h1>{{ course.title }} – Flashcards</h1>
+    <p class="flashcard-subtitle">Tap the card to flip between the question and the answer.</p>
+
+    {% if total_flashcards %}
+    <div class="flashcard-counter">
+        Card <span id="flashcard-current">1</span> of {{ total_flashcards }}
+    </div>
+
+    <div class="flashcard-scene">
+        {% for flashcard in flashcards %}
+        <div
+            class="flashcard"
+            data-index="{{ forloop.counter0 }}"
+            {% if not forloop.first %}style="display: none;"{% endif %}
+        >
+            <div class="flashcard-face front">
+                <p>{{ flashcard.front }}</p>
+            </div>
+            <div class="flashcard-face back">
+                <p>{{ flashcard.back }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="flashcard-nav">
+        <button type="button" id="flashcard-prev" class="btn-secondary" disabled>Previous</button>
+        <button
+            type="button"
+            id="flashcard-next"
+            class="btn-primary"
+            {% if total_flashcards <= 1 %}disabled{% endif %}
+        >
+            Next
+        </button>
+    </div>
+    {% else %}
+    <p>No flashcards are available for this course yet.</p>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const cards = Array.from(document.querySelectorAll(".flashcard"));
+    if (!cards.length) {
+        return;
+    }
+
+    let currentIndex = 0;
+    const currentEl = document.getElementById("flashcard-current");
+    const prevBtn = document.getElementById("flashcard-prev");
+    const nextBtn = document.getElementById("flashcard-next");
+
+    function showCard(index) {
+        cards.forEach((card, i) => {
+            card.style.display = i === index ? "" : "none";
+            if (i === index) {
+                card.classList.remove("is-flipped");
+            }
+        });
+        if (currentEl) {
+            currentEl.textContent = String(index + 1);
+        }
+        if (prevBtn) {
+            prevBtn.disabled = index === 0;
+        }
+        if (nextBtn) {
+            nextBtn.disabled = index === cards.length - 1;
+        }
+    }
+
+    cards.forEach((card) => {
+        card.addEventListener("click", function () {
+            card.classList.toggle("is-flipped");
+        });
+    });
+
+    if (prevBtn) {
+        prevBtn.addEventListener("click", function () {
+            if (currentIndex > 0) {
+                currentIndex -= 1;
+                showCard(currentIndex);
+            }
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener("click", function () {
+            if (currentIndex < cards.length - 1) {
+                currentIndex += 1;
+                showCard(currentIndex);
+            }
+        });
+    }
+
+    showCard(currentIndex);
+});
+</script>
+{% endblock %}
+
+{% extends "base.html" %}
+
+{% block title %}Flashcards – {{ course.title }} – CourseForge{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-header-title">{{ course.title }}</h1>
+    <p class="page-header-meta">
+        <i class="fa-solid fa-clone" aria-hidden="true"></i>
+        {{ total_flashcards }} flashcard{{ total_flashcards|pluralize }}
+    </p>
+</div>
+
+<section class="card card-spaced flashcards-wrapper">
+    {% if not flashcards %}
+    <p>No flashcards are available for this course yet.</p>
+    <p><a href="{% url 'courses:detail' course.slug %}">&larr; Back to course</a></p>
+    {% else %}
+    <header class="flashcards-header">
+        <div class="flashcards-counter">
+            Card <span id="flashcard-current-index">1</span> of <span id="flashcard-total">{{ total_flashcards }}</span>
+        </div>
+    </header>
+
+    <div class="flashcard-stage">
+        <div class="flashcard-card" id="flashcard-card" aria-live="polite">
+            <div class="flashcard-card-inner" id="flashcard-card-inner">
+                <div class="flashcard-face flashcard-face-front" id="flashcard-front">
+                    {{ flashcards.0.front }}
+                </div>
+                <div class="flashcard-face flashcard-face-back" id="flashcard-back">
+                    {{ flashcards.0.back }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flashcards-controls">
+        <button type="button" id="flashcard-prev" class="btn-secondary" aria-label="Previous card">
+            &larr; Previous
+        </button>
+        <button type="button" id="flashcard-next" class="btn-secondary" aria-label="Next card">
+            Next &rarr;
+        </button>
+    </div>
+
+    <p class="flashcards-back-link">
+        <a href="{% url 'courses:detail' course.slug %}">&larr; Back to course overview</a>
+    </p>
+
+    <script>
+        (function () {
+            const data = [
+                {% for card in flashcards %}
+                {
+                    front: {{ card.front|escapejs }},
+                    back: {{ card.back|escapejs }}
+                }{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ];
+
+            const total = data.length;
+            let index = 0;
+
+            const card = document.getElementById("flashcard-card");
+            const cardInner = document.getElementById("flashcard-card-inner");
+            const frontEl = document.getElementById("flashcard-front");
+            const backEl = document.getElementById("flashcard-back");
+            const currentIndexEl = document.getElementById("flashcard-current-index");
+            const totalEl = document.getElementById("flashcard-total");
+            const prevBtn = document.getElementById("flashcard-prev");
+            const nextBtn = document.getElementById("flashcard-next");
+
+            if (!card || !cardInner || !frontEl || !backEl || !currentIndexEl || !totalEl) {
+                return;
+            }
+
+            totalEl.textContent = total.toString();
+
+            function render() {
+                const item = data[index];
+                frontEl.textContent = item.front;
+                backEl.textContent = item.back;
+                currentIndexEl.textContent = (index + 1).toString();
+            }
+
+            function flip() {
+                cardInner.classList.toggle("is-flipped");
+            }
+
+            function go(delta) {
+                index = (index + delta + total) % total;
+                if (cardInner.classList.contains("is-flipped")) {
+                    cardInner.classList.remove("is-flipped");
+                }
+                render();
+            }
+
+            card.addEventListener("click", function () {
+                flip();
+            });
+
+            prevBtn.addEventListener("click", function () {
+                go(-1);
+            });
+
+            nextBtn.addEventListener("click", function () {
+                go(1);
+            });
+
+            render();
+        })();
+    </script>
+
+    <style>
+        .flashcards-wrapper {
+            text-align: center;
+        }
+
+        .flashcards-header {
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .flashcard-stage {
+            perspective: 1200px;
+            margin: 1.5rem auto;
+            max-width: 520px;
+        }
+
+        .flashcard-card {
+            cursor: pointer;
+        }
+
+        .flashcard-card-inner {
+            position: relative;
+            width: 100%;
+            min-height: 210px;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+
+        .flashcard-card-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            border-radius: 0.8rem;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            background: rgba(15, 23, 42, 0.85);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+        }
+
+        .flashcard-face-front {
+            border: 1px solid rgba(96, 165, 250, 0.7);
+        }
+
+        .flashcard-face-back {
+            transform: rotateY(180deg);
+            border: 1px solid rgba(52, 211, 153, 0.7);
+        }
+
+        .flashcards-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .flashcards-back-link {
+            margin-top: 1.5rem;
+        }
+
+        @media (max-width: 600px) {
+            .flashcard-card-inner {
+                min-height: 180px;
+                padding: 1.25rem;
+            }
+        }
+    </style>
+    {% endif %}
+</section>
+{% endblock %}
+

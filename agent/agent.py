@@ -40,13 +40,21 @@ class ExerciseItem(BaseModel):
     matching: MatchingExercise | None = None
 
 
+class FlashcardItem(BaseModel):
+    """One flashcard: short front (prompt) and detailed back (answer)."""
+
+    front: str
+    back: str
+
+
 class CourseContent(BaseModel):
-    """Full course content as returned by the agent: title, overview, cheatsheet, and exercises."""
+    """Full course content as returned by the agent: title, overview, cheatsheet, exercises, and flashcards."""
 
     title: str
     overview: str
     cheatsheet: str
-    exercises: list[ExerciseItem] = Field(..., min_length=1)
+    exercises: list[ExerciseItem] = Field(default_factory=list)
+    flashcards: list[FlashcardItem] = Field(default_factory=list)
 
 
 COURSE_GENERATOR_INSTRUCTIONS = """You are an educational content designer. You will receive a structured request containing:
@@ -54,14 +62,21 @@ COURSE_GENERATOR_INSTRUCTIONS = """You are an educational content designer. You 
 - Difficulty: Beginner, Intermediate, or Advanced — adapt vocabulary, depth of explanation, and exercise difficulty to this level (Beginner = simpler terms and easier questions; Advanced = more technical and challenging)
 - Optional additional instructions: free-form guidance (e.g. "focus on async/await", "use real-world examples", "avoid math-heavy explanations") — follow these carefully when provided
 - Optional number of exercises: if specified, produce exactly that many exercises; otherwise use between 5 and 8
+- Optional number of flashcards: if specified, produce exactly that many flashcards; otherwise use between 5 and 10
+- A line indicating which content to generate (for example: "Content to generate: Questions (5), Flashcards (8)"). Only generate the types of content explicitly requested on that line.
 
 Produce a short course with:
 1. A clear title (short, based on the topic).
 2. One overview paragraph (2-4 sentences) explaining what the learner will learn.
 3. A cheatsheet with key facts, formulas, or definitions written in valid Markdown. Use ### headings for category titles (e.g. "### Basic Verbs") and bullet list items only for the entries beneath each heading. Never put a category title inside a bullet point.
-4. The requested number of exercises (or 5–8 if not specified). Mix multiple choice and matching exercises.
+4. Depending on the request, the specified number of exercises and/or flashcards:
+- Exercises: When exercises are requested, generate the requested number of exercises (or 5–8 if not specified). Mix multiple choice and matching exercises.
 - Multiple choice: exactly 4 options, one correct. Set correct_index to 0, 1, 2, or 3 for the correct option. Always include an explanation: a short sentence explaining why the correct answer is right.
 - Matching: 4 to 6 pairs of (left, right) items that belong together (e.g. term-definition, question-answer).
+- Flashcards: When flashcards are requested, generate the requested number of flashcards (or 5–10 if not specified). Each flashcard must have:
+  - front: a short key term, concept name, or brief question.
+  - back: a clear, self-contained answer or definition that would help a learner recall and understand the concept.
+
 Keep explanations clear and concise. Make exercises fun and instructive. Always respect the difficulty level and any additional instructions."""
 
 

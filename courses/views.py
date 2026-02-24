@@ -15,7 +15,7 @@ from agent.run_course_gen import run_course_generator_sync
 from progress.models import UserProgress
 
 from .forms import CreateCourseForm
-from .models import Course, CourseGenerationJob, Exercise
+from .models import Course, CourseGenerationJob, Exercise, Flashcard
 
 
 def _run_generation(
@@ -24,7 +24,10 @@ def _run_generation(
     user_id: int,
     difficulty: str = "beginner",
     additional_instructions: str | None = None,
+    include_questions: bool = True,
     num_exercises: int | None = None,
+    include_flashcards: bool = False,
+    num_flashcards: int | None = None,
 ) -> None:
     """Background thread: run course generator and update job (status, course, error)."""
     try:
@@ -43,10 +46,13 @@ def _run_generation(
             topic=topic,
             difficulty=difficulty,
             additional_instructions=additional_instructions,
+            include_questions=include_questions,
             num_exercises=num_exercises,
+            include_flashcards=include_flashcards,
+            num_flashcards=num_flashcards,
         )
 
-        job.status_message = "Creating exercises..."
+        job.status_message = "Creating course content..."
         job.save(update_fields=["status_message"])
 
         base_slug = slugify(content.title, allow_unicode=True) or "course"
@@ -60,6 +66,8 @@ def _run_generation(
             slug=slug,
             overview=content.overview,
             cheatsheet=content.cheatsheet,
+            has_questions=bool(content.exercises),
+            has_flashcards=bool(content.flashcards),
             created_by=user,
             topic_normalized=topic.lower()[:255],
             generation_model=generation_model,
@@ -89,6 +97,14 @@ def _run_generation(
                         "pairs": [{"left": p.left, "right": p.right} for p in mat.pairs],
                     },
                 )
+
+        for i, card in enumerate(content.flashcards):
+            Flashcard.objects.create(
+                course=course,
+                order_index=i,
+                front=card.front,
+                back=card.back,
+            )
 
         job.course = course
         job.status = CourseGenerationJob.Status.COMPLETE
@@ -127,6 +143,10 @@ def course_create(request: HttpRequest) -> HttpResponse:
     if not topic:
         form.add_error("topic", "Topic is required.")
         return render(request, "courses/course_create.html", {"form": form})
+    include_questions = form.cleaned_data.get("include_questions", True)
+    include_flashcards = form.cleaned_data.get("include_flashcards", False)
+    num_exercises = form.cleaned_data.get("num_exercises")
+    num_flashcards = form.cleaned_data.get("num_flashcards")
     job = CourseGenerationJob.objects.create(status=CourseGenerationJob.Status.PENDING)
     thread = threading.Thread(
         target=_run_generation,
@@ -136,7 +156,10 @@ def course_create(request: HttpRequest) -> HttpResponse:
             request.user.id,
             form.cleaned_data["difficulty"],
             form.cleaned_data.get("additional_instructions") or None,
-            form.cleaned_data.get("num_exercises"),
+            include_questions,
+            num_exercises,
+            include_flashcards,
+            num_flashcards,
         ),
         daemon=True,
     )
@@ -168,6 +191,7 @@ def course_detail(request: HttpRequest, slug: str) -> HttpResponse:
     """Show course overview, cheatsheet, exercise count, and progress (X/Y) for the current user."""
     course = get_object_or_404(Course, slug=slug)
     exercises = list(course.exercises.order_by("order_index"))
+    total_flashcards = course.flashcards.count()
     completed_count = 0
     if request.user.is_authenticated and exercises:
         completed_count = (
@@ -187,6 +211,7 @@ def course_detail(request: HttpRequest, slug: str) -> HttpResponse:
             "exercises": exercises,
             "completed_count": completed_count,
             "total_exercises": len(exercises),
+            "total_flashcards": total_flashcards,
         },
     )
 
@@ -199,6 +224,21 @@ def course_start(request: HttpRequest, slug: str) -> HttpResponse:
     if not first:
         return redirect("courses:detail", slug=slug)
     return redirect("courses:exercise", slug=slug, index=0)
+
+
+def flashcards_view(request: HttpRequest, slug: str) -> HttpResponse:
+    """Show all flashcards for a course in a flip-card UI."""
+    course = get_object_or_404(Course, slug=slug)
+    flashcards = list(course.flashcards.order_by("order_index"))
+    return render(
+        request,
+        "courses/flashcards.html",
+        {
+            "course": course,
+            "flashcards": flashcards,
+            "total_flashcards": len(flashcards),
+        },
+    )
 
 
 def _check_multiple_choice(exercise: Exercise, selected_index: Any) -> bool:

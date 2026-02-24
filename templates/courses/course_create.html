@@ -4,14 +4,66 @@
 
 {% block content %}
 <h1>Create a course</h1>
-<p class="form-intro">Enter a topic and options. An AI will generate a short course with an overview, cheatsheet, and exercises.</p>
+<p class="form-intro">
+    Enter a topic and options. An AI will generate a short course with an overview, cheatsheet, exercises, and optional flashcards.
+</p>
 <div class="form-narrow-wrap">
     <form method="post" action="{% url 'courses:create' %}" class="form-narrow card">
         {% csrf_token %}
-        {% for field in form %}
-            {% include "partials/form_field.html" with field=field %}
-        {% endfor %}
+        {{ form.non_field_errors }}
+
+        {% include "partials/form_field.html" with field=form.topic %}
+        {% include "partials/form_field.html" with field=form.difficulty %}
+        {% include "partials/form_field.html" with field=form.additional_instructions %}
+
+        <hr>
+        <h2>Content to generate</h2>
+
+        <div class="form-group-toggles">
+            <div class="form-toggle-block">
+                {% include "partials/form_field.html" with field=form.include_questions %}
+                <div id="questions-options" class="form-subsection">
+                    <h3>Questions options</h3>
+                    {% include "partials/form_field.html" with field=form.num_exercises %}
+                </div>
+            </div>
+            <div class="form-toggle-block">
+                {% include "partials/form_field.html" with field=form.include_flashcards %}
+                <div id="flashcards-options" class="form-subsection" style="display: none;">
+                    <h3>Flashcards options</h3>
+                    {% include "partials/form_field.html" with field=form.num_flashcards %}
+                </div>
+            </div>
+        </div>
+
         <button type="submit" class="btn-primary">Generate course</button>
     </form>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const questionsCheckbox = document.getElementById("{{ form.include_questions.id_for_label }}");
+    const flashcardsCheckbox = document.getElementById("{{ form.include_flashcards.id_for_label }}");
+    const questionsOptions = document.getElementById("questions-options");
+    const flashcardsOptions = document.getElementById("flashcards-options");
+
+    function syncVisibility() {
+        if (questionsCheckbox && questionsOptions) {
+            questionsOptions.style.display = questionsCheckbox.checked ? "" : "none";
+        }
+        if (flashcardsCheckbox && flashcardsOptions) {
+            flashcardsOptions.style.display = flashcardsCheckbox.checked ? "" : "none";
+        }
+    }
+
+    if (questionsCheckbox) {
+        questionsCheckbox.addEventListener("change", syncVisibility);
+    }
+    if (flashcardsCheckbox) {
+        flashcardsCheckbox.addEventListener("change", syncVisibility);
+    }
+
+    syncVisibility();
+});
+</script>
 {% endblock %}

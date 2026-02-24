@@ -30,5 +30,6 @@ urlpatterns = [
     path("api/job-status/<uuid:job_id>/", views.job_status_api, name="job_status"),
     path("<uslug:slug>/", views.course_detail, name="detail"),
     path("<uslug:slug>/start/", views.course_start, name="start"),
+    path("<uslug:slug>/flashcards/", views.flashcards_view, name="flashcards"),
     path("<uslug:slug>/exercise/<int:index>/", views.exercise_view, name="exercise"),
 ]

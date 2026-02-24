@@ -47,6 +47,15 @@ class CreateCourseForm(forms.Form):
         ),
         help_text="Optional. Free-form guidance for the course (max 500 characters).",
     )
+    include_questions = forms.BooleanField(
+        required=False,
+        initial=True,
+        label="Generate questions",
+    )
+    include_flashcards = forms.BooleanField(
+        required=False,
+        label="Generate flashcards",
+    )
     num_exercises = forms.TypedChoiceField(
         choices=NUM_EXERCISES_CHOICES,
         coerce=int,
@@ -54,3 +63,19 @@ class CreateCourseForm(forms.Form):
         initial=5,
         help_text="Short quiz (3) to longer course (10).",
     )
+    num_flashcards = forms.TypedChoiceField(
+        choices=[(5, "5"), (10, "10"), (15, "15"), (20, "20")],
+        coerce=int,
+        required=False,
+        label="Number of flashcards",
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        include_questions = cleaned_data.get("include_questions")
+        include_flashcards = cleaned_data.get("include_flashcards")
+
+        if not include_questions and not include_flashcards:
+            raise forms.ValidationError("Select at least one of Questions or Flashcards.")
+
+        return cleaned_data

@@ -26,25 +26,58 @@
 </section>
 
 <section class="card">
+    {% if course.has_questions %}
     <p><strong>{{ total_exercises }}</strong> exercise{{ total_exercises|pluralize }}.</p>
+    {% endif %}
+    {% if course.has_flashcards %}
+    <p><strong>{{ total_flashcards }}</strong> flashcard{{ total_flashcards|pluralize }}.</p>
+    {% endif %}
+
     {% if user.is_authenticated %}
-    {% if completed_count > 0 %}
-    <p>You've completed <strong>{{ completed_count }}</strong> of {{ total_exercises }} exercises.</p>
-    {% if total_exercises %}
-    <div class="progress-bar">
-        <div class="progress-bar-fill" style="width: {% widthratio completed_count total_exercises 100 %}%;"></div>
-    </div>
-    {% endif %}
-    {% endif %}
-    <p class="mb-0"><a href="{% url 'courses:start' course.slug %}" role="button" class="btn-primary">{% if completed_count >= total_exercises %}Review exercises{% else %}Start exercises{% endif %}</a></p>
-    {% else %}
-    <div class="exercise-auth-cta">
-        <p class="exercise-auth-cta__text">Log in to start practising these exercises.</p>
-        <div class="exercise-auth-cta__actions">
-            <a href="{% url 'login' %}" class="btn-primary">Log in to start</a>
-            <a href="{% url 'register' %}" class="btn-secondary">Register free</a>
+        {% if course.has_questions and total_exercises %}
+            {% if completed_count > 0 %}
+            <p>You've completed <strong>{{ completed_count }}</strong> of {{ total_exercises }} exercises.</p>
+            {% if total_exercises %}
+            <div class="progress-bar">
+                <div class="progress-bar-fill" style="width: {% widthratio completed_count total_exercises 100 %}%;"></div>
+            </div>
+            {% endif %}
+            {% endif %}
+        {% endif %}
+
+        <div class="start-actions">
+            {% if course.has_questions and total_exercises %}
+            <a href="{% url 'courses:start' course.slug %}" role="button" class="btn-primary">
+                {% if completed_count >= total_exercises and total_exercises %}
+                    Review exercises
+                {% else %}
+                    Start exercises
+                {% endif %}
+            </a>
+            {% endif %}
+            {% if course.has_flashcards and total_flashcards %}
+            <a href="{% url 'courses:flashcards' course.slug %}" role="button" class="{% if course.has_questions and total_exercises %}btn-secondary{% else %}btn-primary{% endif %}">
+                Study flashcards
+            </a>
+            {% endif %}
         </div>
-    </div>
+    {% else %}
+        <div class="exercise-auth-cta">
+            <p class="exercise-auth-cta__text">
+                Log in to start practising
+                {% if course.has_questions and course.has_flashcards %}
+                    with exercises and flashcards.
+                {% elif course.has_flashcards %}
+                    with flashcards.
+                {% else %}
+                    these exercises.
+                {% endif %}
+            </p>
+            <div class="exercise-auth-cta__actions">
+                <a href="{% url 'login' %}" class="btn-primary">Log in to start</a>
+                <a href="{% url 'register' %}" class="btn-secondary">Register free</a>
+            </div>
+        </div>
     {% endif %}
 </section>
 {% endblock %}

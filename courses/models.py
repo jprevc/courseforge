@@ -11,6 +11,8 @@ class Course(models.Model):
     slug = models.SlugField(max_length=255, unique=True, allow_unicode=True)
     overview = models.TextField()
     cheatsheet = models.TextField()
+    has_questions = models.BooleanField(default=True)
+    has_flashcards = models.BooleanField(default=False)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -74,3 +76,19 @@ class Exercise(models.Model):
 
     def __str__(self) -> str:
         return f"{self.course.title} – #{self.order_index} ({self.exercise_type})"
+
+
+class Flashcard(models.Model):
+    """A single flashcard belonging to a course."""
+
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="flashcards")
+    order_index = models.PositiveIntegerField(default=0)
+    front = models.TextField()
+    back = models.TextField()
+
+    class Meta:
+        ordering = ["course", "order_index"]
+        unique_together = [("course", "order_index")]
+
+    def __str__(self) -> str:
+        return f"{self.course.title} – flashcard #{self.order_index}"
