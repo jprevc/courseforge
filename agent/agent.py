@@ -14,9 +14,9 @@ class MultipleChoiceExercise(BaseModel):
     """One multiple-choice question: 4 options and the index of the correct one."""
 
     question: str
-    options: list[str] = Field(..., min_length=4, max_length=4)
-    correct_index: int = Field(..., ge=0, le=3)
-    explanation: str  # Why the correct answer is right
+    options: list[str] = Field(..., min_length=4, max_length=4, description="Exactly 4 answer choices")
+    correct_index: int = Field(..., ge=0, le=3, description="Index (0–3) of the correct option")
+    explanation: str = Field(..., description="Short sentence explaining why the correct answer is right")
 
 
 class MatchingPair(BaseModel):
@@ -30,7 +30,9 @@ class MatchingExercise(BaseModel):
     """One matching exercise: a list of pairs to connect."""
 
     question: str
-    pairs: list[MatchingPair] = Field(..., min_length=2)
+    pairs: list[MatchingPair] = Field(
+        ..., min_length=4, max_length=6, description="4 to 6 term-definition or concept-answer pairs"
+    )
 
 
 class ExerciseItem(BaseModel):
@@ -44,18 +46,26 @@ class ExerciseItem(BaseModel):
 class FlashcardItem(BaseModel):
     """One flashcard: short front (prompt) and short back (answer, max ~3 words each)."""
 
-    front: str
-    back: str
+    front: str = Field(..., description="Very short key term, concept name, or brief question (at most 3 words)")
+    back: str = Field(..., description="Very short answer or definition (at most 3 words, not a full sentence)")
 
 
 class CourseContent(BaseModel):
     """Full course content as returned by the agent: title, overview, cheatsheet, exercises, and flashcards."""
 
-    title: str
-    overview: str
-    cheatsheet: str
-    exercises: list[ExerciseItem] = Field(default_factory=list)
-    flashcards: list[FlashcardItem] = Field(default_factory=list)
+    title: str = Field(..., description="Short course title based on the topic")
+    overview: str = Field(..., description="One paragraph (2–4 sentences) explaining what the learner will learn")
+    cheatsheet: str = Field(
+        ...,
+        description="Key facts/formulas/definitions in valid Markdown. Use ### headings for category titles and bullet list items for entries beneath each heading. Never put a category title inside a bullet point.",
+    )
+    exercises: list[ExerciseItem] = Field(
+        default_factory=list,
+        description="Mix of multiple_choice and matching exercises. Generate exactly the requested count, or 5–8 if not specified.",
+    )
+    flashcards: list[FlashcardItem] = Field(
+        default_factory=list, description="Generate exactly the requested count, or 5–10 if not specified."
+    )
 
 
 COURSE_GENERATOR_INSTRUCTIONS = """You are an educational content designer. You will receive a structured request containing:
@@ -66,23 +76,11 @@ COURSE_GENERATOR_INSTRUCTIONS = """You are an educational content designer. You 
 - Optional number of flashcards: if specified, produce exactly that many flashcards; otherwise use between 5 and 10
 - A line indicating which content to generate (for example: "Content to generate: Questions (5), Flashcards (8)"). Only generate the types of content explicitly requested on that line.
 
-Produce a short course with:
-1. A clear title (short, based on the topic).
-2. One overview paragraph (2-4 sentences) explaining what the learner will learn.
-3. A cheatsheet with key facts, formulas, or definitions written in valid Markdown. Use ### headings for category titles (e.g. "### Basic Verbs") and bullet list items only for the entries beneath each heading. Never put a category title inside a bullet point.
-4. Depending on the request, the specified number of exercises and/or flashcards:
-- Exercises: When exercises are requested, generate the requested number of exercises (or 5–8 if not specified). Mix multiple choice and matching exercises.
-- Multiple choice: exactly 4 options, one correct. Set correct_index to 0, 1, 2, or 3 for the correct option. Always include an explanation: a short sentence explaining why the correct answer is right.
-- Matching: 4 to 6 pairs of (left, right) items that belong together (e.g. term-definition, question-answer).
-- Flashcards: When flashcards are requested, generate the requested number of flashcards (or 5–10 if not specified). Each flashcard must have:
-  - front: a very short key term, concept name, or brief question (at most 3 words).
-  - back: a very short answer or definition (at most 3 words, not a full sentence) that helps the learner recall the concept.
-
 Keep explanations clear and concise. Make exercises fun and instructive. Always respect the difficulty level and any additional instructions."""
 
 
-def get_course_generator_agent(model: str = "openai:gpt-4o-mini") -> Agent[None, CourseContent]:
-    """Build the course generator agent with the given model string (e.g. openai:gpt-4o-mini)."""
+def get_course_generator_agent(model: str = "openai:gpt-5-mini") -> Agent[None, CourseContent]:
+    """Build the course generator agent with the given model string (e.g. openai:gpt-5-mini)."""
     return Agent(
         model,
         output_type=CourseContent,
