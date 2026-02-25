@@ -3,6 +3,7 @@ Course generator agent: takes a topic string and returns structured CourseConten
 (overview, cheatsheet, exercises) using pydantic-ai with structured output.
 """
 
+import functools
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -90,10 +91,6 @@ def get_course_generator_agent(model: str = "openai:gpt-4o-mini") -> Agent[None,
     )
 
 
-# Default agent instance (model can be overridden via env in run_course_gen)
-_course_agent = None
-
-
 def get_agent_model() -> str:
     """Return the model string used for course generation (env or default). Same as used by get_agent()."""
     import os
@@ -101,10 +98,7 @@ def get_agent_model() -> str:
     return os.environ.get("COURSEFORGE_LLM_MODEL", "openai:gpt-5-mini")
 
 
+@functools.cache
 def get_agent() -> Agent[None, CourseContent]:
     """Return the default course generator agent (lazy init, model from env or default)."""
-    global _course_agent
-    if _course_agent is None:
-        model = get_agent_model()
-        _course_agent = get_course_generator_agent(model=model)
-    return _course_agent
+    return get_course_generator_agent(model=get_agent_model())
