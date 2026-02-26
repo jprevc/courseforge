@@ -73,7 +73,15 @@ A learning platform where users create gamified courses on any topic. Courses ar
 - **Backend**: Django 5.x
 - **Database**: SQLite (default) or PostgreSQL
 - **LLM agent**: pydantic-ai with structured output (Pydantic models)
-- **Frontend**: Django templates, minimal CSS (Water.css)
+- **Frontend**: Django templates, [PicoCSS 2](https://picocss.com/) (`@picocss/pico@2`)
+
+## Architecture
+
+Course creation is **asynchronous** so the UI stays responsive while the LLM runs (10–30 seconds):
+
+1. **Submit** — User submits the topic; the server creates a `CourseGenerationJob` (status `pending`) and starts a **background thread** that calls the pydantic-ai agent.
+2. **Polling** — The user is redirected to the course list. Pending jobs are shown as “Generating…” cards; the page **polls** `GET /courses/api/job-status/<job_id>/` every few seconds.
+3. **Completion** — When the thread finishes, the job status becomes `complete` or `failed`, the `Course` is attached to the job, and a **Notification** is created (“Your course X is ready!” or an error message). The polling client sees the update and refreshes the list (or removes the card on failure).
 
 ## Project structure
 
@@ -82,6 +90,18 @@ A learning platform where users create gamified courses on any topic. Courses ar
 - `courses/` – Course and Exercise models, create/detail/list/start/exercise views
 - `progress/` – UserProgress (per-attempt records)
 - `agent/` – pydantic-ai course generator (CourseContent model, agent, `run_course_gen.py`)
+
+## Docker
+
+For local or deployment-style runs with PostgreSQL:
+
+```bash
+docker compose up -d
+docker compose exec web python manage.py migrate
+docker compose exec web python manage.py createsuperuser  # optional
+```
+
+Then open http://localhost:8000. The `web` service uses `.env` for secrets (e.g. `OPENAI_API_KEY`, `COURSEFORGE_LLM_MODEL`); the compose file sets `PGHOST`, `PGDATABASE`, etc. for the Postgres service. **Note:** The default `POSTGRES_PASSWORD` in `docker-compose.yml` is for local use only—use a strong password and proper secrets in production.
 
 ## Tests
 
