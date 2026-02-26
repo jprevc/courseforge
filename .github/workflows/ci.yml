@@ -32,7 +32,6 @@ jobs:
 
       - name: Run mypy
         run: uv run mypy .
-        continue-on-error: true
 
       - name: Run pytest
         run: uv run pytest
