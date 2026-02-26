@@ -60,6 +60,14 @@ A learning platform where users create gamified courses on any topic. Courses ar
 3. Wait for the agent to generate the course (may take 10–30 seconds).
 4. You are redirected to the course page; you can start exercises or share the link.
 
+## Screenshots
+
+| Course generation form                                                 | Browse courses                                         |
+|------------------------------------------------------------------------|--------------------------------------------------------|
+| ![Course generation form](docs/screenshots/course-generation-form.png) | ![Browse courses](docs/screenshots/browse-courses.png) |
+| Course overview                                                        | Exercise                                               |
+| ![Course overview](docs/screenshots/course-overview.png)               | ![Exercise](docs/screenshots/exercise.png)             |
+
 ## Tech stack
 
 - **Backend**: Django 5.x
