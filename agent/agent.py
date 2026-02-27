@@ -70,8 +70,8 @@ class CourseContent(BaseModel):
 
 COURSE_GENERATOR_INSTRUCTIONS = """You are an educational content designer. You will receive a structured request containing:
 - Topic: the subject of the course
-- Difficulty: Beginner, Intermediate, or Advanced — adapt vocabulary, depth of explanation, and exercise difficulty to this level (Beginner = simpler terms and easier questions; Advanced = more technical and challenging)
-- Optional additional instructions: free-form guidance (e.g. "focus on async/await", "use real-world examples", "avoid math-heavy explanations") — follow these carefully when provided
+- Difficulty: Beginner, Intermediate, or Advanced - adapt vocabulary, depth of explanation, and exercise difficulty to this level (Beginner = simpler terms and easier questions; Advanced = more technical and challenging)
+- Optional additional instructions: free-form guidance (e.g. "focus on async/await", "use real-world examples", "avoid math-heavy explanations") - follow these carefully when provided
 - Optional number of exercises: if specified, produce exactly that many exercises; otherwise use between 5 and 8
 - Optional number of flashcards: if specified, produce exactly that many flashcards; otherwise use between 5 and 10
 - A line indicating which content to generate (for example: "Content to generate: Questions (5), Flashcards (8)"). Only generate the types of content explicitly requested on that line.

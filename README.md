@@ -79,9 +79,9 @@ A learning platform where users create gamified courses on any topic. Courses ar
 
 Course creation is **asynchronous** so the UI stays responsive while the LLM runs (10–30 seconds):
 
-1. **Submit** — User submits the topic; the server creates a `CourseGenerationJob` (status `pending`) and starts a **background thread** that calls the pydantic-ai agent.
-2. **Polling** — The user is redirected to the course list. Pending jobs are shown as “Generating…” cards; the page **polls** `GET /courses/api/job-status/<job_id>/` every few seconds.
-3. **Completion** — When the thread finishes, the job status becomes `complete` or `failed`, the `Course` is attached to the job, and a **Notification** is created (“Your course X is ready!” or an error message). The polling client sees the update and refreshes the list (or removes the card on failure).
+1. **Submit** - User submits the topic; the server creates a `CourseGenerationJob` (status `pending`) and starts a **background thread** that calls the pydantic-ai agent.
+2. **Polling** - The user is redirected to the course list. Pending jobs are shown as “Generating…” cards; the page **polls** `GET /courses/api/job-status/<job_id>/` every few seconds.
+3. **Completion** - When the thread finishes, the job status becomes `complete` or `failed`, the `Course` is attached to the job, and a **Notification** is created (“Your course X is ready!” or an error message). The polling client sees the update and refreshes the list (or removes the card on failure).
 
 ## Project structure
 
@@ -101,7 +101,7 @@ docker compose exec web python manage.py migrate
 docker compose exec web python manage.py createsuperuser  # optional
 ```
 
-Then open http://localhost:8000. The `web` service uses `.env` for secrets (e.g. `OPENAI_API_KEY`, `COURSEFORGE_LLM_MODEL`); the compose file sets `PGHOST`, `PGDATABASE`, etc. for the Postgres service. **Note:** The default `POSTGRES_PASSWORD` in `docker-compose.yml` is for local use only—use a strong password and proper secrets in production.
+Then open http://localhost:8000. The `web` service uses `.env` for secrets (e.g. `OPENAI_API_KEY`, `COURSEFORGE_LLM_MODEL`); the compose file sets `PGHOST`, `PGDATABASE`, etc. for the Postgres service. **Note:** The default `POSTGRES_PASSWORD` in `docker-compose.yml` is for local use only-use a strong password and proper secrets in production.
 
 ## Tests
 

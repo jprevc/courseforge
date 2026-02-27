@@ -376,7 +376,7 @@ def exercise_view(request: HttpRequest, slug: str, index: int) -> HttpResponse:
                         "left": pairs[i]["left"],
                         "correct_right": pairs[i]["right"],
                         "user_right": (
-                            pairs[user_idx]["right"] if user_idx is not None and 0 <= user_idx < len(pairs) else "—"
+                            pairs[user_idx]["right"] if user_idx is not None and 0 <= user_idx < len(pairs) else "-"
                         ),
                         "is_correct": user_idx == i,
                     }
