@@ -35,6 +35,8 @@ def test_course_content_model_parses_valid_output() -> None:
                     "pairs": [
                         {"left": "List comp", "right": "Single expression"},
                         {"left": "for loop", "right": "Multiple statements"},
+                        {"left": "if statement", "right": "Filtering"},
+                        {"left": "else clause", "right": "Alternative value"},
                     ],
                 },
             },
@@ -48,7 +50,7 @@ def test_course_content_model_parses_valid_output() -> None:
     assert content.exercises[0].multiple_choice.options[0] == "[2,4,6]"
     assert content.exercises[1].type == "matching"
     assert content.exercises[1].matching is not None
-    assert len(content.exercises[1].matching.pairs) == 2
+    assert len(content.exercises[1].matching.pairs) == 4
 
 
 @pytest.mark.skipif(
